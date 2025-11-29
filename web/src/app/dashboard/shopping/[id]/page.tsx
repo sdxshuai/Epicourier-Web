@@ -15,6 +15,9 @@ import {
   GripVertical,
   Square,
   CheckSquare,
+  Copy,
+  Printer,
+  Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -228,6 +231,118 @@ export default function ShoppingListDetailPage() {
     return { checked, total, percentage: Math.round((checked / total) * 100) };
   };
 
+  // Generate text for export
+  const generateExportText = (includeChecked: boolean = true) => {
+    if (!list) return "";
+
+    const { groups, sortedCategories } = groupItemsByCategory(list.shopping_list_items);
+    let text = `🛒 ${list.name}\n`;
+    if (list.description) {
+      text += `${list.description}\n`;
+    }
+    text += `\n`;
+
+    for (const category of sortedCategories) {
+      const items = groups[category].filter((item) => includeChecked || !item.is_checked);
+      if (items.length === 0) continue;
+
+      text += `📦 ${category}\n`;
+      for (const item of items) {
+        const checkbox = item.is_checked ? "✓" : "○";
+        const quantity = item.quantity > 1 || item.unit ? ` (${item.quantity}${item.unit ? " " + item.unit : ""})` : "";
+        text += `  ${checkbox} ${item.item_name}${quantity}\n`;
+      }
+      text += `\n`;
+    }
+
+    const progress = calculateProgress();
+    text += `---\n`;
+    text += `Progress: ${progress.checked}/${progress.total} items (${progress.percentage}%)\n`;
+
+    return text;
+  };
+
+  // Copy to clipboard
+  const handleCopyToClipboard = async () => {
+    const text = generateExportText();
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "✅ Copied!",
+        description: "Shopping list copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to copy to clipboard",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Print shopping list
+  const handlePrint = () => {
+    const text = generateExportText();
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${list?.name || "Shopping List"}</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              padding: 20px;
+              max-width: 600px;
+              margin: 0 auto;
+              line-height: 1.6;
+            }
+            h1 { margin-bottom: 5px; }
+            .description { color: #666; margin-bottom: 20px; }
+            .category { font-weight: bold; margin-top: 15px; margin-bottom: 5px; }
+            .item { padding: 3px 0; padding-left: 20px; }
+            .checked { text-decoration: line-through; color: #999; }
+            .footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; color: #666; font-size: 14px; }
+            @media print {
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>🛒 ${list?.name || "Shopping List"}</h1>
+          ${list?.description ? `<p class="description">${list.description}</p>` : ""}
+          ${sortedCategories
+            .map((category) => {
+              const items = groups[category];
+              return `
+                <div class="category">📦 ${category}</div>
+                ${items
+                  .map(
+                    (item) => `
+                      <div class="item ${item.is_checked ? "checked" : ""}">
+                        ${item.is_checked ? "✓" : "○"} ${item.item_name}
+                        ${item.quantity > 1 || item.unit ? `(${item.quantity}${item.unit ? " " + item.unit : ""})` : ""}
+                      </div>
+                    `
+                  )
+                  .join("")}
+              `;
+            })
+            .join("")}
+          <div class="footer">
+            Progress: ${progress.checked}/${progress.total} items (${progress.percentage}%)
+          </div>
+          <script>
+            window.onload = function() { window.print(); }
+          </script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -279,6 +394,26 @@ export default function ShoppingListDetailPage() {
             )}
           </div>
         </div>
+
+        {/* Export Actions */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Share2 className="size-4" />
+              <span className="hidden sm:inline">Share</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={handleCopyToClipboard}>
+              <Copy className="mr-2 size-4" />
+              Copy to Clipboard
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handlePrint}>
+              <Printer className="mr-2 size-4" />
+              Print List
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Progress */}
