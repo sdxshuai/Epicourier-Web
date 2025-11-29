@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { NUTRIENT_NAME } from "../../../../lib/constants";
 import { getRecipeDetail } from "../../../../lib/utils";
+import AddToCartButton from "@/components/shopping/AddToCartButton";
 
 export async function generateStaticParams() {
   const { data: recipes } = await supabase.from("Recipe").select("id");
@@ -38,6 +39,20 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
         <p>🕒 Prep Time: {recipe.min_prep_time} mins</p>
         <p>🌿 Green Score: {recipe.green_score}</p>
       </div>
+      
+      {/* Add to Shopping List Button */}
+      <div className="mb-6">
+        <AddToCartButton
+          ingredients={ingredients.map((i) => ({
+            id: i.ingredient.id,
+            name: i.ingredient.name ?? "Unknown",
+            unit: i.ingredient.unit,
+            quantity: i.relative_unit_100 ? i.relative_unit_100 / 100 : 1,
+          }))}
+          recipeName={recipe.name ?? "Recipe"}
+        />
+      </div>
+
       <p className="mb-4 leading-relaxed whitespace-pre-line text-gray-700">{recipe.description}</p>
       <section className="mb-8">
         <h2 className="mb-3 text-xl font-semibold">Tags</h2>
