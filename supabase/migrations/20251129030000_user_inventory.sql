@@ -11,7 +11,7 @@
 CREATE TABLE IF NOT EXISTS public.user_inventory (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    ingredient_id INTEGER NOT NULL REFERENCES public.ingredients(id) ON DELETE CASCADE,
+    ingredient_id INTEGER NOT NULL REFERENCES public."Ingredient"(id) ON DELETE CASCADE,
     quantity DECIMAL(10, 2) NOT NULL DEFAULT 1,
     unit VARCHAR(50),
     location VARCHAR(50) NOT NULL DEFAULT 'pantry' 
@@ -108,7 +108,7 @@ SELECT
     i.name AS ingredient_name,
     (ui.expiration_date - CURRENT_DATE) AS days_until_expiration
 FROM public.user_inventory ui
-JOIN public.ingredients i ON ui.ingredient_id = i.id
+JOIN public."Ingredient" i ON ui.ingredient_id = i.id
 WHERE ui.expiration_date IS NOT NULL
   AND ui.expiration_date <= CURRENT_DATE + INTERVAL '7 days'
   AND ui.expiration_date >= CURRENT_DATE
@@ -121,7 +121,7 @@ SELECT
     i.name AS ingredient_name,
     (ui.min_quantity - ui.quantity) AS quantity_needed
 FROM public.user_inventory ui
-JOIN public.ingredients i ON ui.ingredient_id = i.id
+JOIN public."Ingredient" i ON ui.ingredient_id = i.id
 WHERE ui.min_quantity IS NOT NULL
   AND ui.quantity <= ui.min_quantity
 ORDER BY (ui.min_quantity - ui.quantity) DESC;

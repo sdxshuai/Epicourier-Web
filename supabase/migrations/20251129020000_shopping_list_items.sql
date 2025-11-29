@@ -11,7 +11,7 @@
 CREATE TABLE IF NOT EXISTS public.shopping_list_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     shopping_list_id UUID NOT NULL REFERENCES public.shopping_lists(id) ON DELETE CASCADE,
-    ingredient_id INTEGER REFERENCES public.ingredients(id) ON DELETE SET NULL,
+    ingredient_id INTEGER REFERENCES public."Ingredient"(id) ON DELETE SET NULL,
     item_name VARCHAR(255) NOT NULL,
     quantity DECIMAL(10, 2) DEFAULT 1,
     unit VARCHAR(50),
