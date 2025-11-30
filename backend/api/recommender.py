@@ -441,7 +441,7 @@ def recommend_from_inventory(inventory_items, preferences=None, num_recipes=5):
 
     # Use KMeans for diversity if we have enough recipes
     top_candidates = scored_recipes[: min(20, len(scored_recipes))]
-    if len(top_candidates) >= num_recipes and len(top_candidates) > num_recipes:
+    if len(top_candidates) > num_recipes:
         diverse_recipes = select_diverse_inventory_recipes(
             top_candidates, recipe_data, num_recipes
         )
