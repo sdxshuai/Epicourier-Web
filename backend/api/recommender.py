@@ -3,7 +3,10 @@ recommender.py — Lazy-load + Render-safe version
 """
 
 import os
+from dataclasses import dataclass, field
+from datetime import datetime
 from functools import lru_cache
+from typing import Optional
 
 import pandas as pd
 import torch
@@ -92,6 +95,11 @@ def load_embedder():
 @lru_cache()
 def load_gemini_client():
     print("Initializing Gemini client ...")
+    if not GEMINI_KEY:
+        raise ValueError(
+            "GEMINI_KEY environment variable not set. "
+            "Please set GEMINI_KEY to use Gemini features."
+        )
     return genai.Client(api_key=GEMINI_KEY)
 
 
@@ -118,14 +126,12 @@ def get_recipe_embeddings(recipe_data):
     return embeddings
 
 
-client = load_gemini_client()
-
-
 # --------------------------------------------------
 # 4. Gemini-based goal expansion
 # --------------------------------------------------
 def nutrition_goal(goal_text):
     """Translate a user's goal into target nutritional values using Gemini."""
+    client = load_gemini_client()
     prompt = (
         "Your task is to translate a user's specific diet goal into precise, "
         "target nutritional values for a daily meal plan.\n"
@@ -142,7 +148,7 @@ def nutrition_goal(goal_text):
 
 def expand_goal(goal_text):
     """Translate a user's goal into nutrition information using Gemini."""
-
+    client = load_gemini_client()
     prompt = (
         "Your task is to translate a user's specific diet goal into precise, "
         "target nutritional values for a daily meal plan.\n\n"
@@ -218,3 +224,195 @@ def create_meal_plan(goal_text, n_meals=3):
 
     # print(f"Expanded goal: {exp_goal}\n")
     return meal_plan, exp_goal
+
+
+# --------------------------------------------------
+# 6. Inventory-based recommendation
+# --------------------------------------------------
+@dataclass
+class CoverageResult:
+    """Result of coverage calculation for a recipe."""
+
+    score: float
+    missing: list[int] = field(default_factory=list)
+
+
+def calculate_coverage(
+    recipe_ingredient_ids: list[int], inventory: list[dict]
+) -> CoverageResult:
+    """
+    Calculate coverage score based on available ingredients.
+
+    Args:
+        recipe_ingredient_ids: List of ingredient IDs required by the recipe
+        inventory: List of inventory items with 'ingredient_id' keys
+
+    Returns:
+        CoverageResult with score (0.0 to 1.0) and list of missing ingredient IDs
+    """
+    if not recipe_ingredient_ids:
+        return CoverageResult(score=1.0, missing=[])
+
+    inventory_ids = {item.get("ingredient_id") for item in inventory}
+    missing = [
+        ing_id for ing_id in recipe_ingredient_ids if ing_id not in inventory_ids
+    ]
+
+    matched_count = len(recipe_ingredient_ids) - len(missing)
+    score = matched_count / len(recipe_ingredient_ids)
+
+    return CoverageResult(score=score, missing=missing)
+
+
+def calculate_expiration_urgency(expiration_date: Optional[str]) -> float:
+    """
+    Calculate expiration urgency score.
+
+    Args:
+        expiration_date: ISO 8601 format date string or None
+
+    Returns:
+        Urgency score from 0.0 (not urgent) to 1.0 (expired or very urgent)
+    """
+    if expiration_date is None:
+        return 0.0
+
+    try:
+        # Parse ISO 8601 date (handle both date-only and datetime formats)
+        if "T" in expiration_date:
+            exp_dt = datetime.fromisoformat(expiration_date.replace("Z", "+00:00"))
+            now = datetime.now(exp_dt.tzinfo) if exp_dt.tzinfo else datetime.now()
+        else:
+            exp_dt = datetime.fromisoformat(expiration_date)
+            now = datetime.now()
+
+        days_until_expiry = (exp_dt - now).days
+
+        # Already expired
+        if days_until_expiry < 0:
+            return 1.0
+
+        # Expiring within 2 days - critical
+        if days_until_expiry <= 2:
+            return 0.9 - (days_until_expiry * 0.05)
+
+        # Expiring within a week
+        if days_until_expiry <= 7:
+            return 0.6 - (days_until_expiry - 2) * 0.05
+
+        # Expiring within 2 weeks
+        if days_until_expiry <= 14:
+            return 0.3 - (days_until_expiry - 7) * 0.02
+
+        # Not urgent
+        return 0.0
+
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def combined_score(coverage: float, expiration: float) -> float:
+    """
+    Calculate combined recommendation score.
+
+    Coverage is weighted higher (70%) than expiration urgency (30%).
+
+    Args:
+        coverage: Coverage score (0.0 to 1.0)
+        expiration: Expiration urgency score (0.0 to 1.0)
+
+    Returns:
+        Combined score (0.0 to 1.0)
+    """
+    coverage_weight = 0.7
+    expiration_weight = 0.3
+
+    return coverage * coverage_weight + expiration * expiration_weight
+
+
+def get_inventory_expiration_urgency(inventory: list[dict]) -> float:
+    """
+    Calculate average expiration urgency for inventory items.
+
+    Args:
+        inventory: List of inventory items with optional 'expiration_date' keys
+
+    Returns:
+        Average urgency score across all inventory items
+    """
+    if not inventory:
+        return 0.0
+
+    urgencies = [
+        calculate_expiration_urgency(item.get("expiration_date"))
+        for item in inventory
+    ]
+    return sum(urgencies) / len(urgencies) if urgencies else 0.0
+
+
+def recommend_by_inventory(
+    inventory: list[dict], num_recipes: int = 5
+) -> list[dict]:
+    """
+    Recommend recipes based on available inventory.
+
+    Args:
+        inventory: List of inventory items with ingredient_id, quantity, and
+                   optional expiration_date
+        num_recipes: Maximum number of recipes to return
+
+    Returns:
+        List of recommended recipes with scores and metadata
+    """
+    if not inventory:
+        return []
+
+    recipe_data = load_recipe_data()
+    supabase = load_supabase()
+
+    # Get recipe-ingredient mappings
+    recipe_ing_map = pd.DataFrame(
+        supabase.table("Recipe-Ingredient_Map").select("*").execute().data
+    )
+
+    # Group ingredients by recipe
+    recipe_ingredients = (
+        recipe_ing_map.groupby("recipe_id")["ingredient_id"]
+        .apply(list)
+        .to_dict()
+    )
+
+    # Calculate average inventory expiration urgency
+    avg_expiration = get_inventory_expiration_urgency(inventory)
+
+    recommendations = []
+    for _, recipe in recipe_data.iterrows():
+        recipe_id = recipe["id"]
+        ingredient_ids = recipe_ingredients.get(recipe_id, [])
+
+        # Calculate coverage
+        coverage_result = calculate_coverage(ingredient_ids, inventory)
+
+        # Skip recipes with zero coverage
+        if coverage_result.score == 0:
+            continue
+
+        # Calculate combined score
+        score = combined_score(coverage_result.score, avg_expiration)
+
+        recommendations.append({
+            "recipe_id": recipe_id,
+            "name": recipe.get("name", ""),
+            "description": recipe.get("description", ""),
+            "coverage_score": round(coverage_result.score, 3),
+            "expiration_urgency": round(avg_expiration, 3),
+            "combined_score": round(score, 3),
+            "missing_ingredients": coverage_result.missing,
+            "ingredients": recipe.get("ingredients", []),
+            "tags": recipe.get("tags", []),
+        })
+
+    # Sort by combined score (descending)
+    recommendations.sort(key=lambda x: x["combined_score"], reverse=True)
+
+    return recommendations[:num_recipes]

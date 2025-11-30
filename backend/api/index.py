@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
@@ -6,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from supabase import Client, create_client
 
-from api.recommender import create_meal_plan
+from api.recommender import create_meal_plan, recommend_by_inventory
 
 load_dotenv()
 
@@ -55,3 +56,24 @@ def recommend_meals(req: RecommendRequest):
 
     plan, expanded_goal = create_meal_plan(req.goal, n_meals=req.num_meals)
     return {"recipes": plan, "goal_expanded": expanded_goal}
+
+
+class InventoryItem(BaseModel):
+    ingredient_id: int
+    quantity: float
+    expiration_date: Optional[str] = None
+
+
+class InventoryRecommendRequest(BaseModel):
+    inventory: list[InventoryItem]
+    num_recipes: int = Field(default=5, ge=1, le=20)
+
+
+@app.post("/inventory-recommend")
+def inventory_recommend(req: InventoryRecommendRequest):
+    """Recommend recipes based on available inventory."""
+    # Convert inventory items to dict format
+    inventory_data = [item.model_dump() for item in req.inventory]
+
+    recipes = recommend_by_inventory(inventory_data, num_recipes=req.num_recipes)
+    return {"recipes": recipes}
