@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Package, Lightbulb, Loader2, Plus } from "lucide-react";
+import { Package, Lightbulb, Loader2, Plus, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   LocationTabs,
@@ -18,18 +18,41 @@ import type {
   InventorySummary,
 } from "@/types/data";
 
+// View mode type for clear state management
+type ViewMode = "all" | "expiring";
+
 export default function InventoryPage() {
   const [items, setItems] = useState<InventoryItemWithDetails[]>([]);
   const [summary, setSummary] = useState<InventorySummary | null>(null);
+  const [globalSummary, setGlobalSummary] = useState<InventorySummary | null>(null); // Always stores unfiltered counts
   const [loading, setLoading] = useState(true);
   const [activeLocation, setActiveLocation] = useState<InventoryLocation | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItemWithDetails | null>(null);
   const [deletingItem, setDeletingItem] = useState<InventoryItemWithDetails | null>(null);
   const [suggesting, setSuggesting] = useState(false);
 
   const { toast } = useToast();
+
+  // Fetch global summary (unfiltered) for location counts
+  const fetchGlobalSummary = useCallback(async () => {
+    try {
+      const response = await fetch("/api/inventory");
+      if (response.ok) {
+        const data = await response.json();
+        setGlobalSummary(data.summary || null);
+      }
+    } catch (error) {
+      console.error("Error fetching global summary:", error);
+    }
+  }, []);
+
+  // Fetch on mount to get global counts
+  useEffect(() => {
+    fetchGlobalSummary();
+  }, [fetchGlobalSummary]);
 
   const fetchInventory = useCallback(async () => {
     setLoading(true);
@@ -105,21 +128,49 @@ export default function InventoryPage() {
   };
 
   const handleViewExpiring = () => {
-    const expiredCount = summary?.expired || 0;
-    const expiringSoonCount = summary?.expiring_soon || 0;
-    toast({
-      title: "Expiring Items",
-      description: expiredCount + " expired, " + expiringSoonCount + " expiring soon",
-    });
+    // Switch to expiring view mode
+    // Keep current location filter - show expiring items from current location only
+    setViewMode("expiring");
+    setSearchQuery("");
   };
 
-  const locationCounts = summary
+  const handleShowAll = () => {
+    // Switch back to all items view (keep current location)
+    setViewMode("all");
+  };
+
+  // Handle location change
+  const handleLocationChange = (location: InventoryLocation | "all") => {
+    // Exit expiring view when changing location
+    if (viewMode === "expiring") {
+      setViewMode("all");
+    }
+    setActiveLocation(location);
+  };
+
+  // Filter items based on view mode
+  // Note: Location filtering is done by API (fetchInventory)
+  // Expiring filtering is done client-side on top of API results
+  const displayItems =
+    viewMode === "expiring"
+      ? items.filter(
+          (item) =>
+            item.expiration_status === "expired" ||
+            item.expiration_status === "critical" ||
+            item.expiration_status === "warning"
+        )
+      : items;
+
+  const isExpiringView = viewMode === "expiring";
+
+  // Use globalSummary for location counts (always unfiltered)
+  const locationCounts = globalSummary
     ? {
-        all: summary.total_items,
-        pantry: summary.by_location.pantry,
-        fridge: summary.by_location.fridge,
-        freezer: summary.by_location.freezer,
-        other: summary.by_location.other,
+        all: globalSummary.total_items,
+        pantry: globalSummary.by_location.pantry,
+        fridge: globalSummary.by_location.fridge,
+        freezer: globalSummary.by_location.freezer,
+        other: globalSummary.by_location.other,
       }
     : undefined;
 
@@ -180,7 +231,7 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {summary && (summary.expired > 0 || summary.expiring_soon > 0) && (
+      {summary && (summary.expired > 0 || summary.expiring_soon > 0) && !isExpiringView && (
         <ExpiringSoonBanner
           expiredCount={summary.expired}
           expiringCount={summary.expiring_soon}
@@ -189,31 +240,59 @@ export default function InventoryPage() {
         />
       )}
 
+      {/* Show filter indicator when viewing expiring items */}
+      {isExpiringView && (
+        <div className="mb-4 flex items-center justify-between rounded-lg border-2 border-orange-400 bg-orange-50 px-4 py-3">
+          <span className="font-semibold text-orange-800">
+            🔍 Viewing {displayItems.length} expiring/expired item{displayItems.length !== 1 ? "s" : ""}
+            {activeLocation !== "all" && ` in ${activeLocation}`}
+          </span>
+          <button
+            onClick={handleShowAll}
+            className="flex items-center gap-1 rounded-md bg-orange-200 px-3 py-1 text-sm font-semibold text-orange-800 hover:bg-orange-300"
+          >
+            <X className="size-4" />
+            Exit Filter
+          </button>
+        </div>
+      )}
+
+      {/* Location tabs - show current selection but disable switching in expiring view */}
       <LocationTabs
         activeLocation={activeLocation}
-        onLocationChange={setActiveLocation}
+        onLocationChange={handleLocationChange}
         counts={locationCounts}
         className="mb-4"
+        disabled={isExpiringView}
       />
 
-      <InventorySearchBar
-        value={searchQuery}
-        onChange={setSearchQuery}
-        className="mb-6"
-      />
+      {/* Search bar - disabled when in expiring view */}
+      {!isExpiringView && (
+        <InventorySearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          className="mb-6"
+        />
+      )}
 
-      {items.length === 0 ? (
+      {displayItems.length === 0 ? (
         <div className="brutalism-panel flex flex-col items-center justify-center p-12 text-center">
           <Package className="mb-4 size-16 text-gray-400" />
           <h2 className="brutalism-heading mb-2 text-xl">
-            {searchQuery ? "No Results Found" : "No Inventory Items Yet"}
+            {isExpiringView
+              ? "No Expiring Items"
+              : searchQuery
+                ? "No Results Found"
+                : "No Inventory Items Yet"}
           </h2>
           <p className="mb-6 text-gray-600">
-            {searchQuery
-              ? "No items match your search"
-              : "Add ingredients to your inventory to track what you have at home"}
+            {isExpiringView
+              ? "Great! None of your items are expiring soon"
+              : searchQuery
+                ? "No items match your search"
+                : "Add ingredients to your inventory to track what you have at home"}
           </p>
-          {!searchQuery && (
+          {!searchQuery && !isExpiringView && (
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="brutalism-button-primary flex items-center gap-2 px-6 py-3"
@@ -222,10 +301,18 @@ export default function InventoryPage() {
               <span>Add First Item</span>
             </button>
           )}
+          {isExpiringView && (
+            <button
+              onClick={handleShowAll}
+              className="brutalism-button-secondary px-6 py-3"
+            >
+              Show All Items
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {items.map((item) => (
+          {displayItems.map((item) => (
             <InventoryItemCard
               key={item.id}
               item={item}
@@ -242,6 +329,7 @@ export default function InventoryPage() {
         onSuccess={() => {
           setIsAddModalOpen(false);
           fetchInventory();
+          fetchGlobalSummary(); // Refresh global counts
         }}
       />
 
@@ -252,6 +340,7 @@ export default function InventoryPage() {
         onSuccess={() => {
           setEditingItem(null);
           fetchInventory();
+          fetchGlobalSummary(); // Refresh global counts
         }}
       />
 
@@ -262,6 +351,7 @@ export default function InventoryPage() {
         onSuccess={() => {
           setDeletingItem(null);
           fetchInventory();
+          fetchGlobalSummary(); // Refresh global counts
         }}
       />
     </div>

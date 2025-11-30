@@ -14,6 +14,7 @@ interface LocationTabsProps {
     other: number;
   };
   className?: string;
+  disabled?: boolean;
 }
 
 const LOCATIONS: { value: InventoryLocation | "all"; label: string; emoji: string }[] = [
@@ -33,9 +34,10 @@ export default function LocationTabs({
   onLocationChange,
   counts,
   className,
+  disabled = false,
 }: LocationTabsProps) {
   return (
-    <div className={cn("flex flex-wrap gap-2", className)}>
+    <div className={cn("flex flex-wrap gap-2", disabled && "opacity-50", className)}>
       {LOCATIONS.map(({ value, label, emoji }) => {
         const isActive = activeLocation === value;
         const count = counts?.[value] ?? 0;
@@ -43,12 +45,14 @@ export default function LocationTabs({
         return (
           <button
             key={value}
-            onClick={() => onLocationChange(value)}
+            onClick={() => !disabled && onLocationChange(value)}
+            disabled={disabled}
             className={cn(
               "flex items-center gap-1.5 rounded-lg border-2 border-black px-3 py-1.5 text-sm font-semibold transition-all",
               isActive
                 ? "bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                : "bg-white text-black hover:bg-gray-100"
+                : "bg-white text-black hover:bg-gray-100",
+              disabled && "cursor-not-allowed hover:bg-white"
             )}
           >
             <span>{emoji}</span>
