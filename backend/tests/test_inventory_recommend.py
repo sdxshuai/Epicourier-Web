@@ -5,6 +5,7 @@ including coverage calculation, expiration scoring, and response formatting.
 """
 import os
 import sys
+import time
 from datetime import datetime, timedelta
 
 # ensure backend is on the import path
@@ -169,7 +170,7 @@ class TestCombinedScoring:
     def test_balanced_scores(self):
         """Balanced scores produce expected result."""
         score = combined_score(coverage=0.5, expiration=0.5)
-        assert score == 0.5  # 0.5 * 0.7 + 0.5 * 0.3 = 0.35 + 0.15
+        assert score == 0.5  # 0.5 * 0.7 + 0.5 * 0.3 = 0.35 + 0.15 = 0.5
 
 
 class TestInventoryRecommendEndpoint:
@@ -416,8 +417,6 @@ class TestPerformance:
 
     def test_reasonable_response_time_small_inventory(self, client):
         """Small inventory should return quickly."""
-        import time
-
         small_inventory = [
             {"ingredient_id": i, "quantity": 100} for i in range(1, 6)
         ]
@@ -437,8 +436,6 @@ class TestPerformance:
 
     def test_reasonable_response_time_medium_inventory(self, client):
         """Medium inventory should return in reasonable time."""
-        import time
-
         medium_inventory = [
             {"ingredient_id": i, "quantity": 100} for i in range(1, 26)
         ]
