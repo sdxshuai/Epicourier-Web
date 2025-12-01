@@ -65,32 +65,30 @@ def recommend_meals(req: RecommendRequest):
 def inventory_recommend(req: InventoryRecommendRequest):
     """
     AI-powered recipe recommendations based on user's inventory.
-    
+
     Prioritizes recipes that use expiring ingredients.
     Uses Gemini 2.5 Flash for intelligent recommendations.
     """
     # Validate inventory
     if not req.inventory:
         raise HTTPException(status_code=400, detail="Inventory cannot be empty")
-    
+
     # Validate num_recipes
     if req.num_recipes < 1 or req.num_recipes > 10:
         raise HTTPException(
-            status_code=400, 
-            detail="num_recipes must be between 1 and 10"
+            status_code=400, detail="num_recipes must be between 1 and 10"
         )
-    
+
     try:
         result = recommend_from_inventory(
             inventory=req.inventory,
             preferences=req.preferences,
-            num_recipes=req.num_recipes
+            num_recipes=req.num_recipes,
         )
         return result
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(
-            status_code=500, 
-            detail=f"Failed to generate recommendations: {str(e)}"
+            status_code=500, detail=f"Failed to generate recommendations: {str(e)}"
         )

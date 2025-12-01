@@ -26,15 +26,17 @@ load_dotenv()
 # --------------------------------------------------
 class InventoryItem(BaseModel):
     """Single inventory item with optional expiration date."""
+
     ingredient_id: int
     name: str
     quantity: float
-    unit: str
+    unit: Optional[str] = None  # Can be null from frontend
     expiration_date: Optional[str] = None  # ISO date string (YYYY-MM-DD)
 
 
 class InventoryRecommendRequest(BaseModel):
     """Request body for inventory-based recommendations."""
+
     inventory: List[InventoryItem]
     preferences: Optional[str] = None  # e.g., "low carb", "high protein"
     num_recipes: int = Field(default=5, ge=1, le=10)
@@ -42,6 +44,7 @@ class InventoryRecommendRequest(BaseModel):
 
 class RecommendedRecipe(BaseModel):
     """Single recipe recommendation."""
+
     recipe_id: int
     recipe_name: str
     match_score: int  # 0-100
@@ -53,6 +56,7 @@ class RecommendedRecipe(BaseModel):
 
 class InventoryRecommendResponse(BaseModel):
     """Response body for inventory recommendations."""
+
     recommendations: List[RecommendedRecipe]
     shopping_suggestions: List[str]
     overall_reasoning: str
@@ -64,22 +68,23 @@ class InventoryRecommendResponse(BaseModel):
 def format_inventory_with_expiration(inventory: List[InventoryItem]) -> str:
     """
     Format inventory items with expiration urgency indicators.
-    
+
     - ❌ EXPIRED: Already expired
     - ⚠️ EXPIRING SOON: Expires within 3 days
     - ⏰ USE SOON: Expires within 7 days
     """
     today = datetime.now().date()
     lines = []
-    
+
     for item in inventory:
-        line = f"- {item.name}: {item.quantity} {item.unit}"
-        
+        unit_str = item.unit if item.unit else "units"
+        line = f"- {item.name}: {item.quantity} {unit_str}"
+
         if item.expiration_date:
             try:
                 exp_date = datetime.fromisoformat(item.expiration_date).date()
                 days_until = (exp_date - today).days
-                
+
                 if days_until < 0:
                     line += f" (EXPIRED {abs(days_until)} days ago) ❌"
                 elif days_until == 0:
@@ -93,32 +98,32 @@ def format_inventory_with_expiration(inventory: List[InventoryItem]) -> str:
             except ValueError:
                 # Invalid date format, skip expiration info
                 pass
-        
+
         lines.append(line)
-    
+
     return "\n".join(lines)
 
 
 def format_recipes_for_prompt(recipe_data, limit: int = 80) -> str:
     """
     Format recipes for Gemini prompt, limiting context size.
-    
+
     Returns format: ID:1 | Recipe Name | Ingredients: ing1, ing2, ing3
     """
     lines = []
-    
+
     for _, row in recipe_data.head(limit).iterrows():
         recipe_id = row.get("id", 0)
         name = row.get("name", "Unknown")
         ingredients = row.get("ingredients", [])
-        
+
         # Limit ingredients to first 10 for context size
         ing_str = ", ".join(ingredients[:10])
         if len(ingredients) > 10:
             ing_str += f" (+{len(ingredients) - 10} more)"
-        
+
         lines.append(f"ID:{recipe_id} | {name} | Ingredients: {ing_str}")
-    
+
     return "\n".join(lines)
 
 
@@ -126,15 +131,12 @@ def format_recipes_for_prompt(recipe_data, limit: int = 80) -> str:
 # 3. Gemini Prompt Builder
 # --------------------------------------------------
 def build_recommendation_prompt(
-    inventory_text: str,
-    recipes_text: str,
-    preferences: Optional[str],
-    num_recipes: int
+    inventory_text: str, recipes_text: str, preferences: Optional[str], num_recipes: int
 ) -> str:
     """Build the Gemini prompt for recipe recommendations."""
-    
+
     pref_section = preferences if preferences else "None specified"
-    
+
     return f"""You are a smart meal planning assistant for Epicourier.
 Based on the user's available ingredients, recommend exactly {num_recipes} recipes.
 
@@ -185,41 +187,35 @@ Respond ONLY with valid JSON. No markdown, no explanation outside JSON."""
 def recommend_from_inventory(
     inventory: List[InventoryItem],
     preferences: Optional[str] = None,
-    num_recipes: int = 5
+    num_recipes: int = 5,
 ) -> InventoryRecommendResponse:
     """
     Generate recipe recommendations using Gemini 2.5 Flash.
-    
+
     Args:
         inventory: List of available inventory items
         preferences: Optional dietary preferences
         num_recipes: Number of recipes to recommend (1-10)
-    
+
     Returns:
         InventoryRecommendResponse with recommendations
     """
     # Load data
     recipe_data = load_recipe_data()
     client = load_gemini_client()
-    
+
     # Format inputs
     inventory_text = format_inventory_with_expiration(inventory)
     recipes_text = format_recipes_for_prompt(recipe_data, limit=80)
-    
+
     # Build prompt
     prompt = build_recommendation_prompt(
-        inventory_text,
-        recipes_text,
-        preferences,
-        num_recipes
+        inventory_text, recipes_text, preferences, num_recipes
     )
-    
+
     # Call Gemini (note: this SDK version doesn't support generation_config)
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-    
+    response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+
     # Parse response - extract JSON from text
     try:
         response_text = response.text.strip()
@@ -231,17 +227,19 @@ def recommend_from_inventory(
         if response_text.endswith("```"):
             response_text = response_text[:-3]
         response_text = response_text.strip()
-        
+
         result = json.loads(response_text)
     except json.JSONDecodeError as e:
         # Fallback: try to extract JSON from response
-        raise ValueError(f"Failed to parse Gemini response as JSON: {e}\nResponse: {response.text[:500]}")
-    
+        raise ValueError(
+            f"Failed to parse Gemini response as JSON: {e}\nResponse: {response.text[:500]}"
+        )
+
     # Validate and return
     return InventoryRecommendResponse(
         recommendations=[
             RecommendedRecipe(**rec) for rec in result.get("recommendations", [])
         ],
         shopping_suggestions=result.get("shopping_suggestions", []),
-        overall_reasoning=result.get("overall_reasoning", "")
+        overall_reasoning=result.get("overall_reasoning", ""),
     )
