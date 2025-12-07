@@ -24,9 +24,7 @@ function formatDate(date: Date): string {
   return date.toISOString().split("T")[0];
 }
 
-export async function getExpiringItemsWithAlerts(
-  userId: string
-): Promise<ExpiringItem[]> {
+export async function getExpiringItemsWithAlerts(userId: string): Promise<ExpiringItem[]> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -43,29 +41,32 @@ export async function getExpiringItemsWithAlerts(
 
   // Calculate alert severity based on days remaining
   return items
-    .map((item: any) => {
-      const daysUntilExpiration = differenceInDays(
-        new Date(item.expiration_date),
-        new Date()
-      );
+    .map(
+      (item: {
+        id: string;
+        item_name: string;
+        expiration_date: string;
+        quantity: number;
+        unit: string;
+      }) => {
+        const daysUntilExpiration = differenceInDays(new Date(item.expiration_date), new Date());
 
-      let alertSeverity: "critical" | "warning" | "info" = "info";
-      if (daysUntilExpiration <= 1) alertSeverity = "critical";
-      else if (daysUntilExpiration <= 3) alertSeverity = "warning";
+        let alertSeverity: "critical" | "warning" | "info" = "info";
+        if (daysUntilExpiration <= 1) alertSeverity = "critical";
+        else if (daysUntilExpiration <= 3) alertSeverity = "warning";
 
-      return {
-        ...item,
-        daysUntilExpiration,
-        alertSeverity,
-      };
-    })
+        return {
+          ...item,
+          daysUntilExpiration,
+          alertSeverity,
+        };
+      }
+    )
     .sort((a, b) => a.daysUntilExpiration - b.daysUntilExpiration);
 }
 
 // Smart notification scheduling
-export async function scheduleExpirationNotifications(
-  userId: string
-): Promise<void> {
+export async function scheduleExpirationNotifications(userId: string): Promise<void> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

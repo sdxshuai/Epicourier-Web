@@ -1,6 +1,6 @@
 /**
  * Shopping Cart Analytics & Insights Dashboard
- * 
+ *
  * Comprehensive analytics system providing:
  * - Inventory spending trends and projections
  * - Food waste estimation and trends
@@ -11,159 +11,161 @@
  * - Nutritional tracking
  */
 
-'use client'
+"use client";
 
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState } from "react";
 
 interface InventoryItem {
-  id: string
-  item_name: string
-  quantity: number
-  unit: string
-  expiration_date: string | null
-  location: string
-  estimated_cost?: number
+  id: string;
+  item_name: string;
+  quantity: number;
+  unit: string;
+  expiration_date: string | null;
+  location: string;
+  estimated_cost?: number;
 }
 
 interface ShoppingTransaction {
-  id: string
-  date: string
-  total: number
-  items_count: number
-  category: string
+  id: string;
+  date: string;
+  total: number;
+  items_count: number;
+  category: string;
 }
 
 interface AnalyticsMetrics {
-  total_inventory_value: number
-  monthly_spending: number
-  waste_percentage: number
-  expiration_rate: number
-  avg_shopping_frequency: number
-  cost_per_meal: number
-  storage_efficiency: number
+  total_inventory_value: number;
+  monthly_spending: number;
+  waste_percentage: number;
+  expiration_rate: number;
+  avg_shopping_frequency: number;
+  cost_per_meal: number;
+  storage_efficiency: number;
 }
 
 interface InsightCategory {
-  title: string
-  value: string | number
-  trend: 'up' | 'down' | 'stable'
-  percentage: number
-  recommendation: string
+  title: string;
+  value: string | number;
+  trend: "up" | "down" | "stable";
+  percentage: number;
+  recommendation: string;
 }
 
 /**
  * Calculate days until expiration
  */
 const getDaysUntilExpiry = (expirationDate: string | null): number => {
-  if (!expirationDate) return 365
-  const expiry = new Date(expirationDate)
-  const today = new Date()
-  const diff = expiry.getTime() - today.getTime()
-  return Math.ceil(diff / (1000 * 60 * 60 * 24))
-}
+  if (!expirationDate) return 365;
+  const expiry = new Date(expirationDate);
+  const today = new Date();
+  const diff = expiry.getTime() - today.getTime();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+};
 
 /**
  * Calculate total inventory value
  */
 export function calculateInventoryValue(items: InventoryItem[]): number {
   return items.reduce((total: number, item: InventoryItem) => {
-    return total + (item.estimated_cost || 0)
-  }, 0)
+    return total + (item.estimated_cost || 0);
+  }, 0);
 }
 
 /**
  * Calculate waste percentage based on expiring items
  */
 export function calculateWastePercentage(items: InventoryItem[]): number {
-  if (items.length === 0) return 0
+  if (items.length === 0) return 0;
 
-  const expiredItems = items.filter(item => {
-    const daysLeft = getDaysUntilExpiry(item.expiration_date)
-    return daysLeft < 0
-  })
+  const expiredItems = items.filter((item) => {
+    const daysLeft = getDaysUntilExpiry(item.expiration_date);
+    return daysLeft < 0;
+  });
 
-  return Math.round((expiredItems.length / items.length) * 100)
+  return Math.round((expiredItems.length / items.length) * 100);
 }
 
 /**
  * Calculate expiration rate (items expiring per day)
  */
 export function calculateExpirationRate(items: InventoryItem[]): number {
-  const nextWeek = items.filter(item => {
-    const daysLeft = getDaysUntilExpiry(item.expiration_date)
-    return daysLeft >= 0 && daysLeft <= 7
-  })
+  const nextWeek = items.filter((item) => {
+    const daysLeft = getDaysUntilExpiry(item.expiration_date);
+    return daysLeft >= 0 && daysLeft <= 7;
+  });
 
-  return nextWeek.length / 7 // items per day
+  return nextWeek.length / 7; // items per day
 }
 
 /**
  * Analyze shopping patterns
  */
 export function analyzeShoppingPatterns(transactions: ShoppingTransaction[]): {
-  avgFrequency: number
-  avgCost: number
-  peakDay: string
-  topCategories: { [key: string]: number }
+  avgFrequency: number;
+  avgCost: number;
+  peakDay: string;
+  topCategories: { [key: string]: number };
 } {
   if (transactions.length === 0) {
     return {
       avgFrequency: 0,
       avgCost: 0,
-      peakDay: 'N/A',
-      topCategories: {}
-    }
+      peakDay: "N/A",
+      topCategories: {},
+    };
   }
 
   // Calculate average frequency (days between shopping trips)
-  const dates = transactions.map(t => new Date(t.date).getTime()).sort((a, b) => a - b)
-  const intervals: number[] = []
+  const dates = transactions.map((t) => new Date(t.date).getTime()).sort((a, b) => a - b);
+  const intervals: number[] = [];
   for (let i = 1; i < dates.length; i++) {
-    intervals.push((dates[i] - dates[i - 1]) / (1000 * 60 * 60 * 24))
+    intervals.push((dates[i] - dates[i - 1]) / (1000 * 60 * 60 * 24));
   }
-  const avgFrequency = intervals.length > 0
-    ? Math.round(intervals.reduce((a: number, b: number) => a + b) / intervals.length)
-    : 0
+  const avgFrequency =
+    intervals.length > 0
+      ? Math.round(intervals.reduce((a: number, b: number) => a + b) / intervals.length)
+      : 0;
 
   // Calculate average cost
   const avgCost = Math.round(
-    transactions.reduce((sum: number, t: ShoppingTransaction) => sum + t.total, 0) / transactions.length
-  )
+    transactions.reduce((sum: number, t: ShoppingTransaction) => sum + t.total, 0) /
+      transactions.length
+  );
 
   // Find peak day
-  const dayMap: { [key: string]: number } = {}
+  const dayMap: { [key: string]: number } = {};
   transactions.forEach((t: ShoppingTransaction) => {
-    const day = new Date(t.date).toLocaleDateString('en-US', { weekday: 'long' })
-    dayMap[day] = (dayMap[day] || 0) + 1
-  })
-  const peakDay = Object.entries(dayMap).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'
+    const day = new Date(t.date).toLocaleDateString("en-US", { weekday: "long" });
+    dayMap[day] = (dayMap[day] || 0) + 1;
+  });
+  const peakDay = Object.entries(dayMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
 
   // Top categories
-  const categoryMap: { [key: string]: number } = {}
+  const categoryMap: { [key: string]: number } = {};
   transactions.forEach((t: ShoppingTransaction) => {
-    categoryMap[t.category] = (categoryMap[t.category] || 0) + t.total
-  })
+    categoryMap[t.category] = (categoryMap[t.category] || 0) + t.total;
+  });
 
   return {
     avgFrequency,
     avgCost,
     peakDay,
-    topCategories: categoryMap
-  }
+    topCategories: categoryMap,
+  };
 }
 
 /**
  * Calculate storage efficiency (items per location)
  */
 export function calculateStorageEfficiency(items: InventoryItem[]): number {
-  const locations = new Set(items.map(i => i.location))
-  if (locations.size === 0) return 0
+  const locations = new Set(items.map((i) => i.location));
+  if (locations.size === 0) return 0;
 
-  const avgItemsPerLocation = items.length / locations.size
+  const avgItemsPerLocation = items.length / locations.size;
   // Ideal is 10-15 items per location
-  const efficiency = Math.min(100, (avgItemsPerLocation / 15) * 100)
+  const efficiency = Math.min(100, (avgItemsPerLocation / 15) * 100);
 
-  return Math.round(efficiency)
+  return Math.round(efficiency);
 }
 
 /**
@@ -173,55 +175,54 @@ export function generateInsights(
   items: InventoryItem[],
   transactions: ShoppingTransaction[]
 ): InsightCategory[] {
-  const patterns = analyzeShoppingPatterns(transactions)
-  const waste = calculateWastePercentage(items)
-  const value = calculateInventoryValue(items)
+  const patterns = analyzeShoppingPatterns(transactions);
+  const waste = calculateWastePercentage(items);
 
-  const insights: InsightCategory[] = []
+  const insights: InsightCategory[] = [];
 
   // Insight 1: High inventory levels
   if (items.length > 50) {
     insights.push({
-      title: 'High Inventory',
+      title: "High Inventory",
       value: `${items.length} items`,
-      trend: 'up',
+      trend: "up",
       percentage: 20,
-      recommendation: 'Use recipes to consume items before expiration'
-    })
+      recommendation: "Use recipes to consume items before expiration",
+    });
   }
 
   // Insight 2: Waste alert
   if (waste > 10) {
     insights.push({
-      title: 'Food Waste',
+      title: "Food Waste",
       value: `${waste}%`,
-      trend: 'up',
+      trend: "up",
       percentage: waste,
-      recommendation: 'Use recipe recommendations to reduce waste'
-    })
+      recommendation: "Use recipe recommendations to reduce waste",
+    });
   }
 
   // Insight 3: High spending
   if (patterns.avgCost > 150) {
     insights.push({
-      title: 'High Spending',
+      title: "High Spending",
       value: `$${patterns.avgCost}`,
-      trend: 'up',
+      trend: "up",
       percentage: 25,
-      recommendation: 'Buy bulk and plan meals strategically'
-    })
+      recommendation: "Buy bulk and plan meals strategically",
+    });
   }
 
   // Insight 4: Shopping frequency
   insights.push({
-    title: 'Shopping Frequency',
+    title: "Shopping Frequency",
     value: `Every ${patterns.avgFrequency} days`,
-    trend: 'stable',
+    trend: "stable",
     percentage: patterns.avgFrequency,
-    recommendation: 'Consolidate shopping trips for efficiency'
-  })
+    recommendation: "Consolidate shopping trips for efficiency",
+  });
 
-  return insights
+  return insights;
 }
 
 /**
@@ -231,47 +232,48 @@ export function calculateCostPerMeal(
   inventory: InventoryItem[],
   mealsPerWeek: number = 21
 ): number {
-  const totalValue = calculateInventoryValue(inventory)
-  const daysOfFood = estimateDaysOfFood(inventory)
+  const totalValue = calculateInventoryValue(inventory);
+  const daysOfFood = estimateDaysOfFood(inventory);
 
-  if (daysOfFood === 0) return 0
+  if (daysOfFood === 0) return 0;
 
-  const costPerDay = totalValue / daysOfFood
-  const costPerMeal = costPerDay / (mealsPerWeek / 7)
+  const costPerDay = totalValue / daysOfFood;
+  const costPerMeal = costPerDay / (mealsPerWeek / 7);
 
-  return Math.round(costPerMeal * 100) / 100
+  return Math.round(costPerMeal * 100) / 100;
 }
 
 /**
  * Estimate days of food
  */
 export function estimateDaysOfFood(items: InventoryItem[]): number {
-  const freshItems = items.filter(item => {
-    const days = getDaysUntilExpiry(item.expiration_date)
-    return days > 0
-  })
+  const freshItems = items.filter((item) => {
+    const days = getDaysUntilExpiry(item.expiration_date);
+    return days > 0;
+  });
 
-  if (freshItems.length === 0) return 0
+  if (freshItems.length === 0) return 0;
 
-  const avgExpiryDays = freshItems.reduce((sum: number, item: InventoryItem) => {
-    return sum + getDaysUntilExpiry(item.expiration_date)
-  }, 0) / freshItems.length
+  const avgExpiryDays =
+    freshItems.reduce((sum: number, item: InventoryItem) => {
+      return sum + getDaysUntilExpiry(item.expiration_date);
+    }, 0) / freshItems.length;
 
-  return Math.round(avgExpiryDays)
+  return Math.round(avgExpiryDays);
 }
 
 /**
  * React Component: Analytics Dashboard
  */
 export const CartAnalyticsDashboard: React.FC<{
-  items: InventoryItem[]
-  transactions: ShoppingTransaction[]
+  items: InventoryItem[];
+  transactions: ShoppingTransaction[];
 }> = ({ items, transactions }) => {
-  const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null)
-  const [insights, setInsights] = useState<InsightCategory[]>([])
+  const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null);
+  const [insights, setInsights] = useState<InsightCategory[]>([]);
 
   useEffect(() => {
-    const patterns = analyzeShoppingPatterns(transactions)
+    const patterns = analyzeShoppingPatterns(transactions);
 
     const calculatedMetrics: AnalyticsMetrics = {
       total_inventory_value: calculateInventoryValue(items),
@@ -280,89 +282,97 @@ export const CartAnalyticsDashboard: React.FC<{
       expiration_rate: calculateExpirationRate(items),
       avg_shopping_frequency: patterns.avgFrequency,
       cost_per_meal: calculateCostPerMeal(items),
-      storage_efficiency: calculateStorageEfficiency(items)
-    }
+      storage_efficiency: calculateStorageEfficiency(items),
+    };
 
-    setMetrics(calculatedMetrics)
-    setInsights(generateInsights(items, transactions))
-  }, [items, transactions])
+    setMetrics(calculatedMetrics);
+    setInsights(generateInsights(items, transactions));
+  }, [items, transactions]);
 
   if (!metrics) {
-    return <div className="bg-gray-200 p-6 rounded-none border-4 border-black">Loading analytics...</div>
+    return (
+      <div className="rounded-none border-4 border-black bg-gray-200 p-6">Loading analytics...</div>
+    );
   }
 
   return (
     <div className="space-y-6">
       {/* Main Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Inventory Value */}
-        <div className="bg-blue-50 border-4 border-blue-900 p-4 rounded-none">
-          <p className="text-xs font-bold uppercase text-gray-600">Inventory Value</p>
-          <p className="text-3xl font-black text-blue-900 mt-2">
+        <div className="rounded-none border-4 border-blue-900 bg-blue-50 p-4">
+          <p className="text-xs font-bold text-gray-600 uppercase">Inventory Value</p>
+          <p className="mt-2 text-3xl font-black text-blue-900">
             ${metrics.total_inventory_value.toFixed(2)}
           </p>
-          <p className="text-xs text-gray-600 mt-1">Current stock</p>
+          <p className="mt-1 text-xs text-gray-600">Current stock</p>
         </div>
 
         {/* Monthly Spending */}
-        <div className="bg-purple-50 border-4 border-purple-900 p-4 rounded-none">
-          <p className="text-xs font-bold uppercase text-gray-600">Monthly Spending</p>
-          <p className="text-3xl font-black text-purple-900 mt-2">
+        <div className="rounded-none border-4 border-purple-900 bg-purple-50 p-4">
+          <p className="text-xs font-bold text-gray-600 uppercase">Monthly Spending</p>
+          <p className="mt-2 text-3xl font-black text-purple-900">
             ${metrics.monthly_spending.toFixed(2)}
           </p>
-          <p className="text-xs text-gray-600 mt-1">Projected</p>
+          <p className="mt-1 text-xs text-gray-600">Projected</p>
         </div>
 
         {/* Cost Per Meal */}
-        <div className="bg-green-50 border-4 border-green-900 p-4 rounded-none">
-          <p className="text-xs font-bold uppercase text-gray-600">Cost/Meal</p>
-          <p className="text-3xl font-black text-green-900 mt-2">
+        <div className="rounded-none border-4 border-green-900 bg-green-50 p-4">
+          <p className="text-xs font-bold text-gray-600 uppercase">Cost/Meal</p>
+          <p className="mt-2 text-3xl font-black text-green-900">
             ${metrics.cost_per_meal.toFixed(2)}
           </p>
-          <p className="text-xs text-gray-600 mt-1">Average</p>
+          <p className="mt-1 text-xs text-gray-600">Average</p>
         </div>
 
         {/* Waste Rate */}
-        <div className={`p-4 rounded-none border-4 ${
-          metrics.waste_percentage > 10
-            ? 'bg-red-50 border-red-900'
-            : 'bg-yellow-50 border-yellow-900'
-        }`}>
-          <p className="text-xs font-bold uppercase text-gray-600">Waste Rate</p>
-          <p className={`text-3xl font-black mt-2 ${
-            metrics.waste_percentage > 10 ? 'text-red-900' : 'text-yellow-900'
-          }`}>
+        <div
+          className={`rounded-none border-4 p-4 ${
+            metrics.waste_percentage > 10
+              ? "border-red-900 bg-red-50"
+              : "border-yellow-900 bg-yellow-50"
+          }`}
+        >
+          <p className="text-xs font-bold text-gray-600 uppercase">Waste Rate</p>
+          <p
+            className={`mt-2 text-3xl font-black ${
+              metrics.waste_percentage > 10 ? "text-red-900" : "text-yellow-900"
+            }`}
+          >
             {metrics.waste_percentage}%
           </p>
-          <p className="text-xs text-gray-600 mt-1">Expired items</p>
+          <p className="mt-1 text-xs text-gray-600">Expired items</p>
         </div>
       </div>
 
       {/* Insights Section */}
       {insights.length > 0 && (
-        <div className="border-4 border-black p-6 bg-white rounded-none">
-          <h3 className="text-lg font-black uppercase mb-4">Smart Insights</h3>
+        <div className="rounded-none border-4 border-black bg-white p-6">
+          <h3 className="mb-4 text-lg font-black uppercase">Smart Insights</h3>
 
           <div className="space-y-3">
             {insights.map((insight, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-4 p-4 border-2 border-gray-200 bg-gray-50"
+                className="flex items-start gap-4 border-2 border-gray-200 bg-gray-50 p-4"
               >
                 <div className="flex-1">
-                  <p className="font-bold text-sm uppercase">{insight.title}</p>
-                  <p className="text-2xl font-black my-1">{insight.value}</p>
+                  <p className="text-sm font-bold uppercase">{insight.title}</p>
+                  <p className="my-1 text-2xl font-black">{insight.value}</p>
                   <p className="text-xs text-gray-600">{insight.recommendation}</p>
                 </div>
-                <div className={`text-sm font-bold px-3 py-1 rounded-none border-2 ${
-                  insight.trend === 'up'
-                    ? 'bg-red-50 border-red-900 text-red-900'
-                    : insight.trend === 'down'
-                      ? 'bg-green-50 border-green-900 text-green-900'
-                      : 'bg-blue-50 border-blue-900 text-blue-900'
-                }`}>
-                  {insight.trend === 'up' ? '↑' : insight.trend === 'down' ? '↓' : '→'}
-                  {' '}{insight.percentage}%
+                <div
+                  className={`rounded-none border-2 px-3 py-1 text-sm font-bold ${
+                    insight.trend === "up"
+                      ? "border-red-900 bg-red-50 text-red-900"
+                      : insight.trend === "down"
+                        ? "border-green-900 bg-green-50 text-green-900"
+                        : "border-blue-900 bg-blue-50 text-blue-900"
+                  }`}
+                >
+                  {insight.trend === "up" ? "↑" : insight.trend === "down" ? "↓" : "→"}{" "}
+                  {insight.percentage}%
                 </div>
               </div>
             ))}
@@ -371,10 +381,10 @@ export const CartAnalyticsDashboard: React.FC<{
       )}
 
       {/* Detailed Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Shopping Pattern */}
-        <div className="border-4 border-black p-4 bg-white rounded-none">
-          <p className="font-bold uppercase text-sm mb-2">Shopping Pattern</p>
+        <div className="rounded-none border-4 border-black bg-white p-4">
+          <p className="mb-2 text-sm font-bold uppercase">Shopping Pattern</p>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Frequency:</span>
@@ -392,8 +402,8 @@ export const CartAnalyticsDashboard: React.FC<{
         </div>
 
         {/* Food Supply */}
-        <div className="border-4 border-black p-4 bg-white rounded-none">
-          <p className="font-bold uppercase text-sm mb-2">Food Supply</p>
+        <div className="rounded-none border-4 border-black bg-white p-4">
+          <p className="mb-2 text-sm font-bold uppercase">Food Supply</p>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Days of food:</span>
@@ -401,9 +411,11 @@ export const CartAnalyticsDashboard: React.FC<{
             </div>
             <div className="flex justify-between">
               <span>Waste rate:</span>
-              <span className={`font-bold ${
-                metrics.waste_percentage > 10 ? 'text-red-600' : 'text-green-600'
-              }`}>
+              <span
+                className={`font-bold ${
+                  metrics.waste_percentage > 10 ? "text-red-600" : "text-green-600"
+                }`}
+              >
                 {metrics.waste_percentage}%
               </span>
             </div>
@@ -415,7 +427,7 @@ export const CartAnalyticsDashboard: React.FC<{
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CartAnalyticsDashboard
+export default CartAnalyticsDashboard;

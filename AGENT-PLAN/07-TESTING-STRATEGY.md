@@ -11,6 +11,7 @@
 This document describes the comprehensive testing strategy for Epicourier, covering **frontend testing** (Jest + React Testing Library) and **backend testing** (Pytest). It includes test organization, coverage targets, and CI/CD integration.
 
 **Purpose**:
+
 - Understand test structure and organization
 - Learn frontend testing patterns (React components, hooks)
 - Learn backend testing patterns (FastAPI endpoints, AI/ML)
@@ -89,8 +90,8 @@ import type { Config } from "jest";
 
 const config: Config = {
   projects: [
-    "<rootDir>/jest.jsdom.config.ts",  // Component tests
-    "<rootDir>/jest.node.config.ts"     // Server tests
+    "<rootDir>/jest.jsdom.config.ts", // Component tests
+    "<rootDir>/jest.node.config.ts", // Server tests
   ],
 };
 
@@ -98,6 +99,7 @@ export default config;
 ```
 
 **Why Multi-Project?**
+
 - Separate DOM tests (components, hooks) from Node tests (configs, middleware)
 - Different environments require different setups
 - Faster parallel execution
@@ -114,12 +116,12 @@ const createJestConfig = nextJest({ dir: "./" });
 const customJestConfig = {
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-  
+
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
   },
-  
+
   transform: {
     "^.+\\.(t|j)sx?$": [
       "@swc/jest",
@@ -153,6 +155,7 @@ export default createJestConfig(customJestConfig);
 ```
 
 **Key Features**:
+
 - **@swc/jest**: Fast TypeScript/JSX transformation
 - **transformIgnorePatterns**: Transform ESM modules from node_modules
 - **moduleNameMapper**: Path aliases (@/) and CSS mocking
@@ -169,15 +172,13 @@ const createJestConfig = nextJest({ dir: "./" });
 const customJestConfig = {
   testEnvironment: "node",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-  
+
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
-  
-  transformIgnorePatterns: [
-    "node_modules/(?!(next|react|react-dom)/)"
-  ],
-  
+
+  transformIgnorePatterns: ["node_modules/(?!(next|react|react-dom)/)"],
+
   testMatch: ["**/__tests__/node/**/*.[jt]s?(x)"],
 };
 
@@ -206,6 +207,7 @@ beforeAll(() => {
 ```
 
 **Purpose**:
+
 - Import `@testing-library/jest-dom` for custom matchers
 - Polyfill `TextEncoder`/`TextDecoder` for Node 16+
 - Suppress console noise during tests
@@ -284,6 +286,7 @@ describe("SearchBar", () => {
 ```
 
 **Best Practices**:
+
 1. ✅ Use `jest.fn()` for callback mocks
 2. ✅ Query by role/label/placeholder (accessibility-friendly)
 3. ✅ Test user interactions (click, type, keypress)
@@ -310,37 +313,21 @@ describe("AddMealModal", () => {
 
   it("does not render when isOpen is false", () => {
     const { container } = render(
-      <AddMealModal
-        recipe={mockRecipe}
-        isOpen={false}
-        onClose={mockOnClose}
-      />
+      <AddMealModal recipe={mockRecipe} isOpen={false} onClose={mockOnClose} />
     );
     expect(container.firstChild).toBeNull();
   });
 
   it("renders modal when isOpen is true", () => {
-    render(
-      <AddMealModal
-        recipe={mockRecipe}
-        isOpen={true}
-        onClose={mockOnClose}
-      />
-    );
-    
+    render(<AddMealModal recipe={mockRecipe} isOpen={true} onClose={mockOnClose} />);
+
     expect(screen.getByText(/select date for test recipe/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/choose a date/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/choose meal type/i)).toBeInTheDocument();
   });
 
   it("calls onClose when cancel button is clicked", () => {
-    render(
-      <AddMealModal
-        recipe={mockRecipe}
-        isOpen={true}
-        onClose={mockOnClose}
-      />
-    );
+    render(<AddMealModal recipe={mockRecipe} isOpen={true} onClose={mockOnClose} />);
 
     const cancelButton = screen.getByRole("button", { name: /cancel/i });
     fireEvent.click(cancelButton);
@@ -394,6 +381,7 @@ describe("AddMealModal", () => {
 ```
 
 **Testing Modals**:
+
 - ✅ Conditional rendering (`isOpen`)
 - ✅ Form inputs (date, select)
 - ✅ API calls with `fetch` mocking
@@ -426,9 +414,7 @@ describe("useRecipes", () => {
       json: async () => mockData,
     });
 
-    const { result } = renderHook(() =>
-      useRecipes({ query: "pasta", page: 1, limit: 20 })
-    );
+    const { result } = renderHook(() => useRecipes({ query: "pasta", page: 1, limit: 20 }));
 
     expect(result.current.isLoading).toBe(true);
 
@@ -447,9 +433,7 @@ describe("useRecipes", () => {
       text: async () => "Server error",
     });
 
-    const { result } = renderHook(() =>
-      useRecipes({ query: "pizza", page: 1 })
-    );
+    const { result } = renderHook(() => useRecipes({ query: "pizza", page: 1 }));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -466,9 +450,7 @@ describe("useRecipes", () => {
       signal: {},
     })) as any;
 
-    const { unmount } = renderHook(() =>
-      useRecipes({ query: "salad", page: 1 })
-    );
+    const { unmount } = renderHook(() => useRecipes({ query: "salad", page: 1 }));
 
     unmount();
 
@@ -478,6 +460,7 @@ describe("useRecipes", () => {
 ```
 
 **Hook Testing**:
+
 - ✅ Use `renderHook` from `@testing-library/react`
 - ✅ Test loading states
 - ✅ Test success/error scenarios
@@ -534,6 +517,7 @@ def client():
 ```
 
 **Fixtures Provide**:
+
 - FastAPI test client
 - Shared setup/teardown logic
 - Dependency injection for tests
@@ -589,7 +573,7 @@ def test_recommend_meals_empty_goal(client):
         "/recommender",
         json={"goal": "", "numMeals": 3}
     )
-    
+
     assert response.status_code == 400
     assert "Goal cannot be empty" in response.json()["detail"]
 
@@ -600,7 +584,7 @@ def test_recommend_meals_invalid_num_meals(client):
         "/recommender",
         json={"goal": "build muscle", "numMeals": 10}
     )
-    
+
     assert response.status_code == 400
     assert "must be one of 3, 5, or 7" in response.json()["detail"]
 
@@ -611,11 +595,12 @@ def test_recommend_meals_missing_field(client):
         "/recommender",
         json={"goal": "get healthy"}  # Missing numMeals
     )
-    
+
     assert response.status_code == 422  # Unprocessable Entity
 ```
 
 **API Testing Patterns**:
+
 1. ✅ Mock expensive operations (`create_meal_plan`)
 2. ✅ Test happy path (200 OK)
 3. ✅ Test validation (400 Bad Request)
@@ -635,7 +620,7 @@ def test_rank_recipes_by_goal():
     with patch("api.recommender.load_recipe_data") as mock_data, \
          patch("api.recommender.nutrition_goal") as mock_goal, \
          patch("api.recommender.load_embedder") as mock_embedder:
-        
+
         # Mock recipe data
         mock_data.return_value = pd.DataFrame({
             "id": [1, 2, 3],
@@ -644,25 +629,26 @@ def test_rank_recipes_by_goal():
             "ingredients": [["ing1"], ["ing2"], ["ing3"]],
             "tags": [["tag1"], ["tag2"], ["tag3"]],
         })
-        
+
         # Mock Gemini response
         mock_goal.return_value = "1500 kcal, 100g protein"
-        
+
         # Mock embedder
         mock_model = MagicMock()
         mock_model.encode.return_value = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]]
         mock_embedder.return_value = mock_model
-        
+
         from api.recommender import rank_recipes_by_goal
-        
+
         ranked, nutri = rank_recipes_by_goal("lose weight", top_k=2)
-        
+
         assert len(ranked) == 2
         assert "similarity" in ranked.columns
         assert nutri == "1500 kcal, 100g protein"
 ```
 
 **Mocking Strategy**:
+
 - ✅ Mock external APIs (Gemini, Supabase)
 - ✅ Mock ML models (SentenceTransformer)
 - ✅ Use `MagicMock` for complex objects
@@ -684,11 +670,11 @@ def test_create_meal_plan_properties(goal, num_meals):
     """Test meal plan creation with random inputs."""
     with patch("api.recommender.rank_recipes_by_goal"), \
          patch("api.recommender.expand_goal"):
-        
+
         from api.recommender import create_meal_plan
-        
+
         plan, expanded = create_meal_plan(goal, n_meals=num_meals)
-        
+
         # Properties that should always hold
         assert isinstance(plan, list)
         assert len(plan) <= num_meals
@@ -697,6 +683,7 @@ def test_create_meal_plan_properties(goal, num_meals):
 ```
 
 **Benefits**:
+
 - ✅ Test with many random inputs
 - ✅ Find edge cases automatically
 - ✅ Verify invariants (properties that always hold)
@@ -725,40 +712,42 @@ pytest backend/tests/ -n auto
 
 ### Coverage Goals
 
-| Module              | Target | Current |
-|---------------------|--------|---------|
-| Frontend Components | >90%   | 92%     |
-| Frontend Hooks      | >85%   | 88%     |
-| Backend API         | >85%   | 87%     |
-| Backend AI/ML       | >80%   | 83%     |
+| Module              | Target   | Current |
+| ------------------- | -------- | ------- |
+| Frontend Components | >90%     | 92%     |
+| Frontend Hooks      | >85%     | 88%     |
+| Backend API         | >85%     | 87%     |
+| Backend AI/ML       | >80%     | 83%     |
 | **Overall**         | **>85%** | **87%** |
 
 ### Gamification Module Coverage (v1.2.0)
 
-| Module                      | Statements | Branches | Lines   |
-|-----------------------------|------------|----------|---------|
-| achievements/route.ts       | 100%       | 84.93%   | 100% ✅ |
-| achievements/check/route.ts | 95.49%     | 80.3%    | 96.07% ✅|
-| notifications/subscribe     | 91.11%     | 78.26%   | 91.11% ✅|
-| notifications/unsubscribe   | 89.47%     | 75%      | 89.47% ✅|
-| notifications/vapid-key     | 100%       | 100%     | 100% ✅ |
-| streaks/route.ts            | 89.65%     | 100%     | 88.88% ✅|
-| streaks/update/route.ts     | 93.1%      | 76.92%   | 93.1% ✅ |
-| challenges/join/route.ts    | 84.84%     | 75%      | 84.84% ✅|
-| challenges/route.ts         | 73.41%     | 54.95%   | 75.15%  |
-| challenges/[id]/route.ts    | 57.34%     | 35.29%   | 58.69%  |
-| UI Components               | 89.84%     | 83.56%   | 92.62% ✅|
-| usePushNotifications        | 76%        | 60.52%   | 78.35%  |
+| Module                      | Statements | Branches | Lines     |
+| --------------------------- | ---------- | -------- | --------- |
+| achievements/route.ts       | 100%       | 84.93%   | 100% ✅   |
+| achievements/check/route.ts | 95.49%     | 80.3%    | 96.07% ✅ |
+| notifications/subscribe     | 91.11%     | 78.26%   | 91.11% ✅ |
+| notifications/unsubscribe   | 89.47%     | 75%      | 89.47% ✅ |
+| notifications/vapid-key     | 100%       | 100%     | 100% ✅   |
+| streaks/route.ts            | 89.65%     | 100%     | 88.88% ✅ |
+| streaks/update/route.ts     | 93.1%      | 76.92%   | 93.1% ✅  |
+| challenges/join/route.ts    | 84.84%     | 75%      | 84.84% ✅ |
+| challenges/route.ts         | 73.41%     | 54.95%   | 75.15%    |
+| challenges/[id]/route.ts    | 57.34%     | 35.29%   | 58.69%    |
+| UI Components               | 89.84%     | 83.56%   | 92.62% ✅ |
+| usePushNotifications        | 76%        | 60.52%   | 78.35%    |
 
 ### Viewing Coverage Reports
 
 **Frontend**:
+
 ```bash
 npm test -- --coverage
 # Opens coverage/lcov-report/index.html
 ```
 
 **Backend**:
+
 ```bash
 pytest backend/tests/ --cov=backend/api --cov-report=html
 # Opens htmlcov/index.html
@@ -784,20 +773,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
-      
+          node-version: "20"
+
       - name: Install dependencies
         working-directory: ./web
         run: npm ci
-      
+
       - name: Run tests
         working-directory: ./web
         run: npm test -- --coverage --maxWorkers=2
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
@@ -808,25 +797,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
-      
+          python-version: "3.11"
+
       - name: Install uv
         run: pip install uv
-      
+
       - name: Install dependencies
         working-directory: ./backend
         run: |
           uv sync
           uv add pytest pytest-cov --dev
-      
+
       - name: Run tests
         working-directory: ./backend
         run: uv run pytest tests/ --cov=api --cov-report=xml
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
@@ -849,6 +838,7 @@ jobs:
 ### What to Test
 
 **DO Test**:
+
 - ✅ User interactions (clicks, typing, form submission)
 - ✅ API responses and error handling
 - ✅ Component rendering and state changes
@@ -856,6 +846,7 @@ jobs:
 - ✅ Integration between modules
 
 **DON'T Test**:
+
 - ❌ Third-party libraries (trust they work)
 - ❌ Implementation details (internal state)
 - ❌ CSS styling (use visual regression instead)
@@ -865,17 +856,18 @@ jobs:
 
 ## 📚 Related Documentation
 
-| Document                                      | Purpose                        |
-|-----------------------------------------------|--------------------------------|
-| [01-TECH-STACK.md](./01-TECH-STACK.md)       | Technology stack overview      |
-| [05-FRONTEND-PATTERNS.md](./05-FRONTEND-PATTERNS.md) | Frontend patterns |
-| [06-BACKEND-PATTERNS.md](./06-BACKEND-PATTERNS.md) | Backend patterns |
+| Document                                             | Purpose                   |
+| ---------------------------------------------------- | ------------------------- |
+| [01-TECH-STACK.md](./01-TECH-STACK.md)               | Technology stack overview |
+| [05-FRONTEND-PATTERNS.md](./05-FRONTEND-PATTERNS.md) | Frontend patterns         |
+| [06-BACKEND-PATTERNS.md](./06-BACKEND-PATTERNS.md)   | Backend patterns          |
 
 ---
 
 ## 🔄 Document Updates
 
 This document should be updated when:
+
 - ✅ New testing tools are added
 - ✅ Coverage targets change
 - ✅ CI/CD pipeline is modified
