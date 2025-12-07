@@ -41,19 +41,27 @@ export async function getExpiringItemsWithAlerts(userId: string): Promise<Expiri
 
   // Calculate alert severity based on days remaining
   return items
-    .map((item: any) => {
-      const daysUntilExpiration = differenceInDays(new Date(item.expiration_date), new Date());
+    .map(
+      (item: {
+        id: string;
+        item_name: string;
+        expiration_date: string;
+        quantity: number;
+        unit: string;
+      }) => {
+        const daysUntilExpiration = differenceInDays(new Date(item.expiration_date), new Date());
 
-      let alertSeverity: "critical" | "warning" | "info" = "info";
-      if (daysUntilExpiration <= 1) alertSeverity = "critical";
-      else if (daysUntilExpiration <= 3) alertSeverity = "warning";
+        let alertSeverity: "critical" | "warning" | "info" = "info";
+        if (daysUntilExpiration <= 1) alertSeverity = "critical";
+        else if (daysUntilExpiration <= 3) alertSeverity = "warning";
 
-      return {
-        ...item,
-        daysUntilExpiration,
-        alertSeverity,
-      };
-    })
+        return {
+          ...item,
+          daysUntilExpiration,
+          alertSeverity,
+        };
+      }
+    )
     .sort((a, b) => a.daysUntilExpiration - b.daysUntilExpiration);
 }
 

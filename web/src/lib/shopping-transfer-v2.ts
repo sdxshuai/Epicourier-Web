@@ -159,7 +159,7 @@ export async function getTransferHistory(shoppingListId: string) {
 /**
  * Undo last transfer (move items back to shopping list as unchecked)
  */
-export async function undoLastTransfer(shoppingListId: string, userId: string) {
+export async function undoLastTransfer(shoppingListId: string) {
   try {
     console.log("Undoing transfer for shopping list:", shoppingListId);
     return { success: true, message: "Transfer undone successfully" };
@@ -174,7 +174,7 @@ export async function undoLastTransfer(shoppingListId: string, userId: string) {
 /**
  * Get summary statistics for transfers
  */
-export async function getTransferStats(userId: string) {
+export async function getTransferStats() {
   // Mock data
   return {
     total_transfers: 12,
@@ -189,7 +189,13 @@ export async function getTransferStats(userId: string) {
 export function useShoppingTransfer() {
   const [isTransferring, setIsTransferring] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastTransferResult, setLastTransferResult] = useState<any>(null);
+  const [lastTransferResult, setLastTransferResult] = useState<{
+    success: boolean;
+    transferred?: number;
+    failed?: number;
+    message?: string;
+    error?: string;
+  } | null>(null);
 
   const transfer = async (
     shoppingListId: string,
@@ -218,12 +224,12 @@ export function useShoppingTransfer() {
     }
   };
 
-  const undo = async (shoppingListId: string, userId: string) => {
+  const undo = async (shoppingListId: string) => {
     setIsTransferring(true);
     setError(null);
 
     try {
-      const result = await undoLastTransfer(shoppingListId, userId);
+      const result = await undoLastTransfer(shoppingListId);
       if (!result.success) {
         setError(result.error || "Undo failed");
       }

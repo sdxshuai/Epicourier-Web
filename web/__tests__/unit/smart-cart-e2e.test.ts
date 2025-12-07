@@ -1,11 +1,11 @@
 /**
- * Smart Cart E2E Test Suite (Vitest compatible)
+ * Smart Cart E2E Test Suite (Jest compatible)
  *
  * Comprehensive end-to-end tests for Smart Cart workflow
  * Tests complete user journeys from inventory management through recommendations
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, jest } from "@jest/globals";
 
 /**
  * Mock user session
@@ -19,7 +19,16 @@ const mockUser = {
 /**
  * Mock inventory items
  */
-const mockInventoryItems = [
+const mockInventoryItems: Array<{
+  id: string;
+  user_id: string;
+  item_name: string;
+  quantity: number;
+  unit: string;
+  location: string;
+  expiration_date: string | null;
+  min_quantity: number;
+}> = [
   {
     id: "inv-1",
     user_id: mockUser.id,
@@ -92,19 +101,20 @@ describe("Smart Cart - Inventory Management", () => {
   });
 
   it("should calculate expiration urgency", () => {
-    const calculateDaysUntilExpiry = (expiryDate) => {
+    const calculateDaysUntilExpiry = (expiryDate: string) => {
       const expiry = new Date(expiryDate);
       const today = new Date();
       const diff = expiry.getTime() - today.getTime();
       return Math.ceil(diff / (1000 * 60 * 60 * 24));
     };
 
-    const daysLeft = calculateDaysUntilExpiry(inventoryDb[1].expiration_date);
+    const daysLeft = inventoryDb[1].expiration_date
+      ? calculateDaysUntilExpiry(inventoryDb[1].expiration_date)
+      : 0;
     expect(daysLeft).toBeLessThanOrEqual(2);
   });
 
   it("should identify low stock items", () => {
-    const lowStockItems = inventoryDb.filter((i) => i.quantity < i.min_quantity);
     // Mock scenario where Milk is below minimum
     inventoryDb[1].quantity = 0.3;
     const lowStock = inventoryDb.filter((i) => i.quantity < i.min_quantity);
@@ -116,7 +126,15 @@ describe("Smart Cart - Inventory Management", () => {
  * Test Suite: Shopping List Management
  */
 describe("Smart Cart - Shopping List Management", () => {
-  let shoppingListsDb = [];
+  let shoppingListsDb: Array<{
+    id: string;
+    user_id: string;
+    name: string;
+    description?: string;
+    is_archived?: boolean;
+    created_at?: string;
+    items: Array<{ id: string; name: string; quantity: number; unit: string; is_checked: boolean }>;
+  }> = [];
 
   beforeEach(() => {
     shoppingListsDb = [];
@@ -139,7 +157,18 @@ describe("Smart Cart - Shopping List Management", () => {
   });
 
   it("should add items to shopping list", () => {
-    const list = {
+    const list: {
+      id: string;
+      user_id: string;
+      name: string;
+      items: Array<{
+        id: string;
+        name: string;
+        quantity: number;
+        unit: string;
+        is_checked: boolean;
+      }>;
+    } = {
       id: "list-1",
       user_id: mockUser.id,
       name: "Test List",
@@ -199,7 +228,7 @@ describe("Smart Cart - Shopping List Management", () => {
  */
 describe("Smart Cart - Expiration Alerts", () => {
   it("should identify expiring items", () => {
-    const calculateDaysUntilExpiry = (expiryDate) => {
+    const calculateDaysUntilExpiry = (expiryDate: string) => {
       const expiry = new Date(expiryDate);
       const today = new Date();
       const diff = expiry.getTime() - today.getTime();
@@ -207,6 +236,7 @@ describe("Smart Cart - Expiration Alerts", () => {
     };
 
     const expiringItems = mockInventoryItems.filter((item) => {
+      if (!item.expiration_date) return false;
       const days = calculateDaysUntilExpiry(item.expiration_date);
       return days <= 3 && days >= 0;
     });
@@ -215,7 +245,7 @@ describe("Smart Cart - Expiration Alerts", () => {
   });
 
   it("should categorize urgency levels", () => {
-    const getUrgencyLevel = (days) => {
+    const getUrgencyLevel = (days: number) => {
       if (days <= 1) return "critical";
       if (days <= 3) return "warning";
       return "info";
@@ -227,8 +257,9 @@ describe("Smart Cart - Expiration Alerts", () => {
   });
 
   it("should calculate waste percentage", () => {
-    const calculateWaste = (items) => {
-      const expiredItems = items.filter((item) => {
+    const calculateWaste = (items: Array<{ expiration_date: string | null }>) => {
+      const expiredItems = items.filter((item: { expiration_date: string | null }) => {
+        if (!item.expiration_date) return false;
         const expiry = new Date(item.expiration_date);
         return expiry < new Date();
       });
@@ -246,11 +277,16 @@ describe("Smart Cart - Expiration Alerts", () => {
  */
 describe("Smart Cart - Analytics", () => {
   it("should calculate inventory value", () => {
-    const calculateValue = (items) => {
-      return items.reduce((total, item) => {
-        const estimatedCost = item.quantity * (item.unit === "g" ? 0.005 : 3);
-        return total + estimatedCost;
-      }, 0);
+    const calculateValue = (
+      items: Array<{ quantity: number; unit: string; estimated_cost?: number }>
+    ) => {
+      return items.reduce(
+        (total: number, item: { quantity: number; unit: string; estimated_cost?: number }) => {
+          const estimatedCost = item.quantity * (item.unit === "g" ? 0.005 : 3);
+          return total + estimatedCost;
+        },
+        0
+      );
     };
 
     const value = calculateValue(mockInventoryItems);
@@ -278,7 +314,7 @@ describe("Smart Cart - Analytics", () => {
   });
 
   it("should estimate cost per meal", () => {
-    const calculateCostPerMeal = (totalValue, daysOfFood) => {
+    const calculateCostPerMeal = (totalValue: number, daysOfFood: number) => {
       const costPerDay = totalValue / daysOfFood;
       return Math.round((costPerDay / 3) * 100) / 100; // 3 meals per day
     };
@@ -308,7 +344,7 @@ describe("Smart Cart - Performance", () => {
 
   it("should cache API responses", () => {
     const cache = new Map();
-    const getCachedData = (key, fn, ttl = 5000) => {
+    const getCachedData = <T>(key: string, fn: () => T, ttl = 5000): T => {
       if (cache.has(key)) {
         const { data, timestamp } = cache.get(key);
         if (Date.now() - timestamp < ttl) {
@@ -328,15 +364,13 @@ describe("Smart Cart - Performance", () => {
   });
 
   it("should debounce search requests", async () => {
-    let callCount = 0;
-    const searchFn = vi.fn(async (query) => {
-      callCount++;
+    const searchFn = jest.fn(async () => {
       return [{ id: 1, name: "Result 1" }];
     });
 
-    const debounced = (fn, delay = 300) => {
-      let timeout;
-      return async (...args) => {
+    const debounced = <T extends (...args: unknown[]) => Promise<unknown>>(fn: T, delay = 300) => {
+      let timeout: NodeJS.Timeout | undefined;
+      return async (...args: unknown[]) => {
         clearTimeout(timeout);
         return new Promise((resolve) => {
           timeout = setTimeout(() => resolve(fn(...args)), delay);
@@ -366,7 +400,7 @@ describe("Smart Cart - Data Persistence", () => {
   it("should persist inventory across sessions", () => {
     const storage = new Map();
 
-    const saveInventory = (items) => {
+    const saveInventory = (items: unknown[]) => {
       storage.set("inventory", JSON.stringify(items));
     };
 

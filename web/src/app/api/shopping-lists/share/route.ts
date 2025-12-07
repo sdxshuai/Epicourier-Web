@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     expiryDate.setDate(expiryDate.getDate() + expiryDays);
 
     // Create share record in database
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("shopping_list_shares")
       .insert({
         shopping_list_id: shoppingListId,

@@ -29,9 +29,9 @@ export const CACHE_CONFIG = {
  * Simple in-memory cache implementation
  */
 class DataCache {
-  private cache = new Map<string, { data: any; timestamp: number }>();
+  private cache = new Map<string, { data: unknown; timestamp: number }>();
 
-  get(key: string, maxAge: number): any | null {
+  get(key: string, maxAge: number): unknown | null {
     const item = this.cache.get(key);
     if (!item) return null;
 
@@ -44,7 +44,7 @@ class DataCache {
     return item.data;
   }
 
-  set(key: string, data: any): void {
+  set(key: string, data: unknown): void {
     this.cache.set(key, { data, timestamp: Date.now() });
   }
 
@@ -83,7 +83,7 @@ export function useCachedFetch<T>(
 
   useEffect(() => {
     if (cachedData) {
-      setState({ data: cachedData, loading: false, error: null });
+      setState({ data: cachedData as T, loading: false, error: null });
       return;
     }
 
@@ -214,12 +214,11 @@ export const QueryOptimization = {
   /**
    * Debounce API calls to reduce request frequency
    */
-  debounceRequest<T extends any[], R>(
+  debounceRequest<T extends unknown[], R>(
     fn: (...args: T) => Promise<R>,
     delay: number = 300
   ): (...args: T) => Promise<R> {
     let timeoutId: NodeJS.Timeout | null = null;
-    let lastPromise: Promise<R> | null = null;
 
     return (...args: T) => {
       return new Promise((resolve, reject) => {
@@ -240,7 +239,7 @@ export const QueryOptimization = {
   /**
    * Throttle API calls with minimum interval
    */
-  throttleRequest<T extends any[], R>(
+  throttleRequest<T extends unknown[], R>(
     fn: (...args: T) => Promise<R>,
     delay: number = 1000
   ): (...args: T) => Promise<R> {
@@ -276,7 +275,8 @@ export const MemoryManagement = {
    */
   setupMemoryMonitor(threshold: number = 50 * 1024 * 1024): () => void {
     const interval = setInterval(() => {
-      if ((performance as any).memory && (performance as any).memory.usedJSHeapSize > threshold) {
+      const perfMemory = performance as { memory?: { usedJSHeapSize: number } };
+      if (perfMemory.memory && perfMemory.memory.usedJSHeapSize > threshold) {
         console.warn("Memory threshold exceeded, clearing caches");
         dataCache.clear();
       }
@@ -294,7 +294,7 @@ export const BundleOptimization = {
    * Lazy load heavy components
    */
   LAZY_COMPONENTS: {
-    SmartCartWidget: () => import("@/components/dashboard/SmartCartWidget").then((m) => m.default),
+    SmartCartWidget: () => import("@/components/ui/SmartCartWidget").then((m) => m.default),
   },
 
   /**

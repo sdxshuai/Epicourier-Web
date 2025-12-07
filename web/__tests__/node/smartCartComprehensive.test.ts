@@ -9,7 +9,7 @@
  * - E2E user journey tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "@jest/globals";
+import { describe, it, expect } from "@jest/globals";
 
 // Test Suite 1: Inventory Utility Functions
 describe("Inventory Utilities - Expiration Calculation", () => {

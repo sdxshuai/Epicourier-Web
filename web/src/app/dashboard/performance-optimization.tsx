@@ -1,7 +1,7 @@
 // Performance optimization for dashboard
 // Issue #105: Dashboard loading optimization
 
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 
 // Lazy load heavy components
 const InventoryPage = lazy(() => import("./inventory/page"));
@@ -10,8 +10,8 @@ const RecommenderPage = lazy(() => import("./recommender/page"));
 
 // Loading fallback
 const LoadingFallback = () => (
-  <div className="flex items-center justify-center h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  <div className="flex h-screen items-center justify-center">
+    <div className="border-primary h-12 w-12 animate-spin rounded-full border-b-2"></div>
   </div>
 );
 

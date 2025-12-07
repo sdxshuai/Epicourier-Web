@@ -13,7 +13,7 @@
 
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 
 interface InventoryItem {
   id: string;
@@ -177,7 +177,6 @@ export function generateInsights(
 ): InsightCategory[] {
   const patterns = analyzeShoppingPatterns(transactions);
   const waste = calculateWastePercentage(items);
-  const value = calculateInventoryValue(items);
 
   const insights: InsightCategory[] = [];
 

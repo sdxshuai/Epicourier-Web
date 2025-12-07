@@ -7,15 +7,6 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-interface InventoryItem {
-  id: string;
-  item_name: string;
-  quantity: number;
-  unit: string;
-  min_quantity: number;
-  location: string;
-}
-
 interface LowStockAlert {
   item_id: string;
   item_name: string;
@@ -42,9 +33,18 @@ export async function getLowStockItems(userId: string): Promise<LowStockAlert[]>
 
   // Filter items below minimum quantity
   const lowStockItems: LowStockAlert[] = items
-    .filter((item: any) => item.quantity <= item.min_quantity)
+    .filter(
+      (item: { quantity: number; min_quantity: number }) => item.quantity <= item.min_quantity
+    )
     .map(
-      (item: any): LowStockAlert => ({
+      (item: {
+        id: string;
+        item_name: string;
+        quantity: number;
+        unit: string;
+        min_quantity: number;
+        location: string;
+      }): LowStockAlert => ({
         item_id: item.id,
         item_name: item.item_name,
         current_quantity: item.quantity,
