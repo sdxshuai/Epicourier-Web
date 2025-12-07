@@ -1,9 +1,9 @@
 /**
  * Shopping List to Inventory Transfer Workflow
- * 
+ *
  * Automatically transfer purchased shopping list items to user's inventory
  * after marking them as checked/completed in shopping list view.
- * 
+ *
  * Features:
  * - Bulk transfer of checked items to inventory
  * - Auto-calculate expiration dates based on item type
@@ -12,74 +12,74 @@
  * - Transfer history tracking
  */
 
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState } from "react";
 
 interface ShoppingListItem {
-  id: string
-  shopping_list_id: string
-  ingredient_id: string | null
-  item_name: string
-  quantity: number
-  unit: string
-  category: string
-  is_checked: boolean
-  position: number
-  created_at: string
+  id: string;
+  shopping_list_id: string;
+  ingredient_id: string | null;
+  item_name: string;
+  quantity: number;
+  unit: string;
+  category: string;
+  is_checked: boolean;
+  position: number;
+  created_at: string;
 }
 
 interface TransferConfig {
-  item_name: string
-  quantity: number
-  unit: string
-  location: 'Fridge' | 'Freezer' | 'Pantry'
-  expiration_date: string | null
-  min_quantity: number
+  item_name: string;
+  quantity: number;
+  unit: string;
+  location: "Fridge" | "Freezer" | "Pantry";
+  expiration_date: string | null;
+  min_quantity: number;
 }
 
 /**
  * Calculate default expiration date based on item category
  */
 const getDefaultExpirationDate = (category: string): string | null => {
-  const today = new Date()
-  let days = 14 // Default: 2 weeks
+  const today = new Date();
+  let days = 14; // Default: 2 weeks
 
   // Category-specific defaults
   const expirationMap: { [key: string]: number | null } = {
-    'Dairy': 7,
-    'Meat': 3,
-    'Seafood': 2,
-    'Produce': 5,
-    'Pantry': null, // No expiry for pantry items
-    'Frozen': null,
-    'Beverages': 30
-  }
+    Dairy: 7,
+    Meat: 3,
+    Seafood: 2,
+    Produce: 5,
+    Pantry: null, // No expiry for pantry items
+    Frozen: null,
+    Beverages: 30,
+  };
 
-  days = expirationMap[category] || days
+  days = expirationMap[category] || days;
 
-  if (days === null) return null
+  if (days === null) return null;
 
-  today.setDate(today.getDate() + days)
-  return today.toISOString().split('T')[0]
-}
+  today.setDate(today.getDate() + days);
+  return today.toISOString().split("T")[0];
+};
 
 /**
  * Get default location based on item category
  */
-const getDefaultLocation = (category: string): 'Fridge' | 'Freezer' | 'Pantry' => {
-  const locationMap: { [key: string]: 'Fridge' | 'Freezer' | 'Pantry' } = {
-    'Dairy': 'Fridge',
-    'Meat': 'Freezer',
-    'Seafood': 'Freezer',
-    'Produce': 'Fridge',
-    'Pantry': 'Pantry',
-    'Frozen': 'Freezer',
-    'Beverages': 'Fridge'
-  }
+const getDefaultLocation = (category: string): "Fridge" | "Freezer" | "Pantry" => {
+  const locationMap: { [key: string]: "Fridge" | "Freezer" | "Pantry" } = {
+    Dairy: "Fridge",
+    Meat: "Freezer",
+    Seafood: "Freezer",
+    Produce: "Fridge",
+    Pantry: "Pantry",
+    Frozen: "Freezer",
+    Beverages: "Fridge",
+  };
 
-  return locationMap[category] || 'Pantry'
-}
+  return locationMap[category] || "Pantry";
+};
 
 /**
  * Transfer checked shopping list items to inventory
@@ -89,18 +89,18 @@ export async function transferItemsToInventory(
   checkedItems: ShoppingListItem[],
   userId: string
 ) {
-  const transferredItems = []
+  const transferredItems = [];
 
   try {
     // Prepare transfer configs
-    const configs: TransferConfig[] = checkedItems.map(item => ({
+    const configs: TransferConfig[] = checkedItems.map((item) => ({
       item_name: item.item_name,
       quantity: item.quantity,
       unit: item.unit,
       location: getDefaultLocation(item.category),
       expiration_date: getDefaultExpirationDate(item.category),
-      min_quantity: Math.ceil(item.quantity * 0.5) // Set min qty to 50% of current
-    }))
+      min_quantity: Math.ceil(item.quantity * 0.5), // Set min qty to 50% of current
+    }));
 
     // Simulate API call for each item
     for (const config of configs) {
@@ -113,31 +113,31 @@ export async function transferItemsToInventory(
         location: config.location,
         expiration_date: config.expiration_date,
         min_quantity: config.min_quantity,
-        notes: `Transferred from shopping list on ${new Date().toLocaleDateString()}`
-      })
+        notes: `Transferred from shopping list on ${new Date().toLocaleDateString()}`,
+      });
     }
 
     // Create transfer history record
-    console.log('Transfer complete', {
+    console.log("Transfer complete", {
       shopping_list_id: shoppingListId,
       user_id: userId,
       transferred_items_count: transferredItems.length,
-      transferred_at: new Date().toISOString()
-    })
+      transferred_at: new Date().toISOString(),
+    });
 
     return {
       success: true,
       transferred_count: transferredItems.length,
-      items: transferredItems
-    }
+      items: transferredItems,
+    };
   } catch (error) {
-    console.error('Transfer error:', error)
+    console.error("Transfer error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Transfer failed',
+      error: error instanceof Error ? error.message : "Transfer failed",
       transferred_count: transferredItems.length,
-      items: transferredItems
-    }
+      items: transferredItems,
+    };
   }
 }
 
@@ -148,12 +148,12 @@ export async function getTransferHistory(shoppingListId: string) {
   // Mock data
   return [
     {
-      id: '1',
+      id: "1",
       shopping_list_id: shoppingListId,
       transferred_items_count: 5,
-      transferred_at: new Date().toISOString()
-    }
-  ]
+      transferred_at: new Date().toISOString(),
+    },
+  ];
 }
 
 /**
@@ -161,13 +161,13 @@ export async function getTransferHistory(shoppingListId: string) {
  */
 export async function undoLastTransfer(shoppingListId: string, userId: string) {
   try {
-    console.log('Undoing transfer for shopping list:', shoppingListId)
-    return { success: true, message: 'Transfer undone successfully' }
+    console.log("Undoing transfer for shopping list:", shoppingListId);
+    return { success: true, message: "Transfer undone successfully" };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Undo failed'
-    }
+      error: error instanceof Error ? error.message : "Undo failed",
+    };
   }
 }
 
@@ -179,75 +179,71 @@ export async function getTransferStats(userId: string) {
   return {
     total_transfers: 12,
     total_items_transferred: 156,
-    avg_items_per_transfer: 13
-  }
+    avg_items_per_transfer: 13,
+  };
 }
 
 /**
  * React Hook for managing transfers
  */
 export function useShoppingTransfer() {
-  const [isTransferring, setIsTransferring] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [lastTransferResult, setLastTransferResult] = useState<any>(null)
+  const [isTransferring, setIsTransferring] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastTransferResult, setLastTransferResult] = useState<any>(null);
 
   const transfer = async (
     shoppingListId: string,
     checkedItems: ShoppingListItem[],
     userId: string
   ) => {
-    setIsTransferring(true)
-    setError(null)
+    setIsTransferring(true);
+    setError(null);
 
     try {
-      const result = await transferItemsToInventory(
-        shoppingListId,
-        checkedItems,
-        userId
-      )
+      const result = await transferItemsToInventory(shoppingListId, checkedItems, userId);
 
       if (result.success) {
-        setLastTransferResult(result)
-        return result
+        setLastTransferResult(result);
+        return result;
       } else {
-        setError(result.error || 'Transfer failed')
-        return result
+        setError(result.error || "Transfer failed");
+        return result;
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Transfer failed'
-      setError(errorMsg)
-      return { success: false, error: errorMsg }
+      const errorMsg = err instanceof Error ? err.message : "Transfer failed";
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
     } finally {
-      setIsTransferring(false)
+      setIsTransferring(false);
     }
-  }
+  };
 
   const undo = async (shoppingListId: string, userId: string) => {
-    setIsTransferring(true)
-    setError(null)
+    setIsTransferring(true);
+    setError(null);
 
     try {
-      const result = await undoLastTransfer(shoppingListId, userId)
+      const result = await undoLastTransfer(shoppingListId, userId);
       if (!result.success) {
-        setError(result.error || 'Undo failed')
+        setError(result.error || "Undo failed");
       }
-      return result
+      return result;
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Undo failed'
-      setError(errorMsg)
-      return { success: false, error: errorMsg }
+      const errorMsg = err instanceof Error ? err.message : "Undo failed";
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
     } finally {
-      setIsTransferring(false)
+      setIsTransferring(false);
     }
-  }
+  };
 
   return {
     transfer,
     undo,
     isTransferring,
     error,
-    lastTransferResult
-  }
+    lastTransferResult,
+  };
 }
 
 /**
@@ -279,4 +275,4 @@ CREATE POLICY "Users can create transfer records"
 -- Index for performance
 CREATE INDEX shopping_list_transfers_user_id_idx 
   ON shopping_list_transfers(user_id, transferred_at DESC);
-`
+`;

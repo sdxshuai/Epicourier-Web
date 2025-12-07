@@ -1,7 +1,7 @@
 /**
  * Low Stock Alert System
  * Issue #110: Inventory Management - Low Stock Notifications
- * 
+ *
  * Provides proactive notifications when inventory items fall below minimum quantities
  */
 
@@ -26,9 +26,7 @@ interface LowStockAlert {
   urgency: "critical" | "warning";
 }
 
-export async function getLowStockItems(
-  userId: string
-): Promise<LowStockAlert[]> {
+export async function getLowStockItems(userId: string): Promise<LowStockAlert[]> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -44,23 +42,19 @@ export async function getLowStockItems(
 
   // Filter items below minimum quantity
   const lowStockItems: LowStockAlert[] = items
-    .filter(
-      (item: any) => item.quantity <= item.min_quantity
+    .filter((item: any) => item.quantity <= item.min_quantity)
+    .map(
+      (item: any): LowStockAlert => ({
+        item_id: item.id,
+        item_name: item.item_name,
+        current_quantity: item.quantity,
+        min_quantity: item.min_quantity,
+        quantity_needed: Math.ceil(item.min_quantity * 1.5 - item.quantity), // Suggest restock to 1.5x min
+        location: item.location,
+        urgency: item.quantity <= item.min_quantity * 0.5 ? "critical" : "warning",
+      })
     )
-    .map((item: any): LowStockAlert => ({
-      item_id: item.id,
-      item_name: item.item_name,
-      current_quantity: item.quantity,
-      min_quantity: item.min_quantity,
-      quantity_needed: Math.ceil(item.min_quantity * 1.5 - item.quantity), // Suggest restock to 1.5x min
-      location: item.location,
-      urgency:
-        item.quantity <= item.min_quantity * 0.5 ? "critical" : "warning",
-    }))
-    .sort(
-      (a: LowStockAlert, b: LowStockAlert) =>
-        a.current_quantity - b.current_quantity
-    );
+    .sort((a: LowStockAlert, b: LowStockAlert) => a.current_quantity - b.current_quantity);
 
   return lowStockItems;
 }
@@ -118,9 +112,7 @@ export async function generateRestockingList(userId: string): Promise<string> {
     is_checked: false,
   }));
 
-  const { error: itemsError } = await supabase
-    .from("shopping_list_items")
-    .insert(items);
+  const { error: itemsError } = await supabase.from("shopping_list_items").insert(items);
 
   if (itemsError) throw itemsError;
 
@@ -128,10 +120,7 @@ export async function generateRestockingList(userId: string): Promise<string> {
 }
 
 // Set minimum quantity for an item
-export async function updateMinimumQuantity(
-  itemId: string,
-  minQuantity: number
-): Promise<void> {
+export async function updateMinimumQuantity(itemId: string, minQuantity: number): Promise<void> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

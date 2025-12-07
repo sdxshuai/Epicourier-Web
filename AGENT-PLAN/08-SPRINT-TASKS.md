@@ -26,11 +26,11 @@ This document tracks development milestones, tasks, and roadmap for the Epicouri
 **Active Phase**: Phase 2 - Advanced Features (v1.1.0 - v1.3.0)  
 **Phase 2 Scope**: Nutrient Tracking → Gamification → Smart Cart
 
-| Version | Feature Area      | Status                | Progress |
-|---------|-------------------|----------------------|----------|
-| v1.1.0  | Nutrient Tracking | ✅ Complete          | 10/10    |
-| v1.2.0  | Gamification      | ✅ Complete          | 15/15 (core + extended + testing) |
-| v1.3.0  | Smart Cart        | 🚧 In Progress       | 29/30 (E1 ✅, E2 ✅, E3 ✅, E4 ✅, E5 🚧) |
+| Version | Feature Area      | Status         | Progress                                  |
+| ------- | ----------------- | -------------- | ----------------------------------------- |
+| v1.1.0  | Nutrient Tracking | ✅ Complete    | 10/10                                     |
+| v1.2.0  | Gamification      | ✅ Complete    | 15/15 (core + extended + testing)         |
+| v1.3.0  | Smart Cart        | 🚧 In Progress | 29/30 (E1 ✅, E2 ✅, E3 ✅, E4 ✅, E5 🚧) |
 
 **Overall Phase 2 Progress**: ~97% (v1.1.0 + v1.2.0 complete, v1.3.0 97% complete)
 
@@ -91,18 +91,18 @@ This document tracks development milestones, tasks, and roadmap for the Epicouri
 
 #### ✅ Completed Issues (Challenge System - Epic #66)
 
-| Issue | Title                                                     | Type       | Priority | Status               |
-| ----- | --------------------------------------------------------- | ---------- | -------- | -------------------- |
-| #65   | feat(database): Challenge system schema                   | Database   | P1       | ✅ Complete (PR #69) |
-| #66   | feat(api): Challenge CRUD and progress tracking API       | Backend    | P1       | ✅ Complete (PR #69) |
-| #68   | feat(frontend): Challenge participation UI                | Frontend   | P1       | ✅ Complete (PR #69) |
+| Issue | Title                                               | Type     | Priority | Status               |
+| ----- | --------------------------------------------------- | -------- | -------- | -------------------- |
+| #65   | feat(database): Challenge system schema             | Database | P1       | ✅ Complete (PR #69) |
+| #66   | feat(api): Challenge CRUD and progress tracking API | Backend  | P1       | ✅ Complete (PR #69) |
+| #68   | feat(frontend): Challenge participation UI          | Frontend | P1       | ✅ Complete (PR #69) |
 
 #### ✅ Completed Issues (Streak System - Epic #67)
 
-| Issue | Title                                                     | Type       | Priority | Status               |
-| ----- | --------------------------------------------------------- | ---------- | -------- | -------------------- |
-| #61   | feat(database): Streak tracking schema                    | Database   | P2       | ✅ Complete (PR #70) |
-| #60   | feat(full-stack): Streak tracking dashboard widget        | Full-Stack | P2       | ✅ Complete (PR #70) |
+| Issue | Title                                              | Type       | Priority | Status               |
+| ----- | -------------------------------------------------- | ---------- | -------- | -------------------- |
+| #61   | feat(database): Streak tracking schema             | Database   | P2       | ✅ Complete (PR #70) |
+| #60   | feat(full-stack): Streak tracking dashboard widget | Full-Stack | P2       | ✅ Complete (PR #70) |
 
 **Core Deliverables** (Shipped):
 
@@ -142,9 +142,9 @@ This document tracks development milestones, tasks, and roadmap for the Epicouri
 
 #### ✅ Completed Issues (Testing & Quality)
 
-| Issue | Title                                                     | Type       | Priority | Status               |
-| ----- | --------------------------------------------------------- | ---------- | -------- | -------------------- |
-| #64   | test: Gamification integration tests                      | Testing    | P2       | ✅ Complete (PR #74) |
+| Issue | Title                                | Type    | Priority | Status               |
+| ----- | ------------------------------------ | ------- | -------- | -------------------- |
+| #64   | test: Gamification integration tests | Testing | P2       | ✅ Complete (PR #74) |
 
 **Integration Testing Deliverables** (PR #74):
 
@@ -159,26 +159,27 @@ This document tracks development milestones, tasks, and roadmap for the Epicouri
 
 The following features were originally planned for v1.2.0 but deferred due to priority adjustments or complexity:
 
-| Feature | Original Description | Status | Deferral Reason | Target Version |
-|---------|---------------------|--------|-----------------|----------------|
-| **Rewards System** | Unlock features through achievements | ❌ Not Implemented | High complexity, requires incentive mechanism design | v2.0.0 |
-| **Leaderboard** | Community rankings (optional) | ❌ Not Implemented | Requires social feature infrastructure | v3.1.0 |
-| **Achievement Toast** | Notify on unlocks (frontend) | 🟡 API Ready, Frontend Not Implemented | Prioritized core functionality | v1.3.0 or v2.0.0 |
-| **Push Notification Trigger** | Auto-send push on achievement unlock | 🟡 API Ready, Trigger Logic Not Implemented | Requires Service Worker completion | v2.0.0 |
+| Feature                       | Original Description                 | Status                                      | Deferral Reason                                      | Target Version   |
+| ----------------------------- | ------------------------------------ | ------------------------------------------- | ---------------------------------------------------- | ---------------- |
+| **Rewards System**            | Unlock features through achievements | ❌ Not Implemented                          | High complexity, requires incentive mechanism design | v2.0.0           |
+| **Leaderboard**               | Community rankings (optional)        | ❌ Not Implemented                          | Requires social feature infrastructure               | v3.1.0           |
+| **Achievement Toast**         | Notify on unlocks (frontend)         | 🟡 API Ready, Frontend Not Implemented      | Prioritized core functionality                       | v1.3.0 or v2.0.0 |
+| **Push Notification Trigger** | Auto-send push on achievement unlock | 🟡 API Ready, Trigger Logic Not Implemented | Requires Service Worker completion                   | v2.0.0           |
 
 **Notes**:
+
 - `🟡` indicates backend API is ready (`/api/notifications/*`), but frontend integration or trigger logic is incomplete
 - Rewards and Leaderboard are "Nice to Have" and do not affect core Gamification experience
 - Achievement Toast (#62) can be quickly implemented in v1.3.0 as a polish task
 
 #### 📝 Backlog Issues (Post v1.2.0)
 
-| Issue | Title                                                     | Type       | Priority | Target   | Status       |
-| ----- | --------------------------------------------------------- | ---------- | -------- | -------- | ------------ |
-| #62   | feat(frontend): Achievement notification toast system     | Frontend   | P2       | v1.3.0   | 📝 Backlog   |
-| #63   | feat(backend): Push notification service for achievements | Next.js API| P3       | v2.0.0   | 📝 Backlog   |
-| TBD   | feat(gamification): Rewards system - unlock features      | Full-Stack | P3       | v2.0.0   | 📝 To Create |
-| TBD   | feat(gamification): Community leaderboard                 | Full-Stack | P3       | v3.1.0   | 📝 To Create |
+| Issue | Title                                                     | Type        | Priority | Target | Status       |
+| ----- | --------------------------------------------------------- | ----------- | -------- | ------ | ------------ |
+| #62   | feat(frontend): Achievement notification toast system     | Frontend    | P2       | v1.3.0 | 📝 Backlog   |
+| #63   | feat(backend): Push notification service for achievements | Next.js API | P3       | v2.0.0 | 📝 Backlog   |
+| TBD   | feat(gamification): Rewards system - unlock features      | Full-Stack  | P3       | v2.0.0 | 📝 To Create |
+| TBD   | feat(gamification): Community leaderboard                 | Full-Stack  | P3       | v3.1.0 | 📝 To Create |
 
 ---
 
@@ -192,25 +193,26 @@ The following features were originally planned for v1.2.0 but deferred due to pr
 
 #### Epic Overview
 
-| Epic # | Title                                           | Sub-Issues | Priority | Status        |
-| ------ | ----------------------------------------------- | ---------- | -------- | ------------- |
-| #75    | Epic: Database Foundation (E1)                  | #76-#79    | P0       | ✅ Complete   |
-| #80    | Epic: Shopping List System (E2)                 | #81-#86    | P0       | ✅ Complete   |
-| #87    | Epic: Inventory Management System (E3)          | #88-#92    | P0       | ✅ Complete   |
-| #93    | Epic: AI Recipe Recommendations (E4)            | #94-#98    | P1       | ✅ Complete   |
-| #99    | Epic: Integration, Polish & Deployment (E5)     | #100-#104  | P0       | � In Progress |
+| Epic # | Title                                       | Sub-Issues | Priority | Status        |
+| ------ | ------------------------------------------- | ---------- | -------- | ------------- |
+| #75    | Epic: Database Foundation (E1)              | #76-#79    | P0       | ✅ Complete   |
+| #80    | Epic: Shopping List System (E2)             | #81-#86    | P0       | ✅ Complete   |
+| #87    | Epic: Inventory Management System (E3)      | #88-#92    | P0       | ✅ Complete   |
+| #93    | Epic: AI Recipe Recommendations (E4)        | #94-#98    | P1       | ✅ Complete   |
+| #99    | Epic: Integration, Polish & Deployment (E5) | #100-#104  | P0       | � In Progress |
 
 #### ✅ Epic 1: Database Foundation (Sprint 1) - COMPLETE
 
-| Issue | Title                                                    | Type     | Priority | Status        |
-| ----- | -------------------------------------------------------- | -------- | -------- | ------------- |
-| #75   | epic: Smart Cart System - Database Foundation (E1)       | Epic     | P0       | ✅ Complete (PR #105) |
-| #76   | feat(database): shopping_lists table schema              | Database | P0       | ✅ Complete (PR #105) |
-| #77   | feat(database): shopping_list_items table schema         | Database | P0       | ✅ Complete (PR #105) |
-| #78   | feat(database): user_inventory table schema              | Database | P0       | ✅ Complete (PR #105) |
-| #79   | chore(types): TypeScript types for shopping/inventory    | Frontend | P1       | ✅ Complete (PR #105) |
+| Issue | Title                                                 | Type     | Priority | Status                |
+| ----- | ----------------------------------------------------- | -------- | -------- | --------------------- |
+| #75   | epic: Smart Cart System - Database Foundation (E1)    | Epic     | P0       | ✅ Complete (PR #105) |
+| #76   | feat(database): shopping_lists table schema           | Database | P0       | ✅ Complete (PR #105) |
+| #77   | feat(database): shopping_list_items table schema      | Database | P0       | ✅ Complete (PR #105) |
+| #78   | feat(database): user_inventory table schema           | Database | P0       | ✅ Complete (PR #105) |
+| #79   | chore(types): TypeScript types for shopping/inventory | Frontend | P1       | ✅ Complete (PR #105) |
 
 **Schema Design Preview**:
+
 ```sql
 -- shopping_lists: User's shopping list metadata
 shopping_lists (
@@ -232,9 +234,9 @@ user_inventory (
 
 #### ✅ Epic 2: Shopping List System (Sprint 2) - COMPLETE
 
-| Issue | Title                                                    | Type     | Priority | Status     |
-| ----- | -------------------------------------------------------- | -------- | -------- | ---------- |
-| #80   | Epic: Shopping List System (E2)                          | Epic     | P0       | ✅ Complete |
+| Issue | Title                                                    | Type     | Priority | Status                |
+| ----- | -------------------------------------------------------- | -------- | -------- | --------------------- |
+| #80   | Epic: Shopping List System (E2)                          | Epic     | P0       | ✅ Complete           |
 | #81   | feat(frontend): Shopping list create/read UI             | Frontend | P0       | ✅ Complete (PR #106) |
 | #82   | feat(frontend): Shopping list update/delete              | Frontend | P0       | ✅ Complete (PR #107) |
 | #83   | feat(frontend): Shopping list items management           | Frontend | P0       | ✅ Complete (PR #112) |
@@ -243,6 +245,7 @@ user_inventory (
 | #86   | test(frontend): Shopping list unit and integration tests | Testing  | P1       | ✅ Complete (PR #112) |
 
 **Epic 2 Deliverables**:
+
 - ✅ Shopping list CRUD UI with cards
 - ✅ Shopping list detail page with item management
 - ✅ Generate shopping list from calendar date range
@@ -254,16 +257,17 @@ user_inventory (
 
 #### ✅ Epic 3: Inventory Management System (Sprint 3) - COMPLETE
 
-| Issue | Title                                                    | Type     | Priority | Status     |
-| ----- | -------------------------------------------------------- | -------- | -------- | ---------- |
-| #87   | Epic: Inventory Management System (E3)                   | Epic     | P0       | ✅ Complete (PR #135) |
-| #88   | feat(frontend): Inventory CRUD UI                        | Frontend | P0       | ✅ Complete (PR #135) |
-| #89   | feat(frontend): Expiration tracking and alerts           | Frontend | P0       | ✅ Complete (PR #135) |
-| #90   | feat(frontend): Low stock alerts                         | Frontend | P1       | ✅ Complete (PR #135) |
-| #91   | feat(frontend): Recipe match indicator on recipe cards   | Frontend | P1       | ✅ Complete (PR #109) |
-| #92   | test(frontend): Inventory system tests                   | Testing  | P1       | ✅ Complete (PR #135) |
+| Issue | Title                                                  | Type     | Priority | Status                |
+| ----- | ------------------------------------------------------ | -------- | -------- | --------------------- |
+| #87   | Epic: Inventory Management System (E3)                 | Epic     | P0       | ✅ Complete (PR #135) |
+| #88   | feat(frontend): Inventory CRUD UI                      | Frontend | P0       | ✅ Complete (PR #135) |
+| #89   | feat(frontend): Expiration tracking and alerts         | Frontend | P0       | ✅ Complete (PR #135) |
+| #90   | feat(frontend): Low stock alerts                       | Frontend | P1       | ✅ Complete (PR #135) |
+| #91   | feat(frontend): Recipe match indicator on recipe cards | Frontend | P1       | ✅ Complete (PR #109) |
+| #92   | test(frontend): Inventory system tests                 | Testing  | P1       | ✅ Complete (PR #135) |
 
 **Epic 3 Deliverables**:
+
 - ✅ Inventory CRUD UI with card layout and filtering
 - ✅ Expiration tracking with color-coded alerts (green/yellow/red)
 - ✅ Low stock warning indicators
@@ -275,16 +279,17 @@ user_inventory (
 
 #### ✅ Epic 4: AI Recipe Recommendations (Sprint 4) - COMPLETE
 
-| Issue | Title                                                    | Type       | Priority | Status     |
-| ----- | -------------------------------------------------------- | ---------- | -------- | ---------- |
-| #93   | Epic: AI Recipe Recommendations from Inventory (E4)      | Epic       | P1       | ✅ Complete (PR #137) |
-| #94   | feat(python): AI recipe suggestions from inventory       | Python API | P0       | ✅ Complete (PR #137) |
-| #95   | feat(python): Expiration priority in suggestions         | Python API | P0       | ✅ Complete (PR #137) |
-| #96   | feat(frontend): Suggest recipes from inventory button    | Frontend   | P0       | ✅ Complete (PR #137) |
-| #97   | feat(frontend): Recipe recommendation modal              | Frontend   | P0       | ✅ Complete (PR #137) |
-| #98   | test(python): Inventory recommendation API tests         | Testing    | P1       | ✅ Complete (PR #137) |
+| Issue | Title                                                 | Type       | Priority | Status                |
+| ----- | ----------------------------------------------------- | ---------- | -------- | --------------------- |
+| #93   | Epic: AI Recipe Recommendations from Inventory (E4)   | Epic       | P1       | ✅ Complete (PR #137) |
+| #94   | feat(python): AI recipe suggestions from inventory    | Python API | P0       | ✅ Complete (PR #137) |
+| #95   | feat(python): Expiration priority in suggestions      | Python API | P0       | ✅ Complete (PR #137) |
+| #96   | feat(frontend): Suggest recipes from inventory button | Frontend   | P0       | ✅ Complete (PR #137) |
+| #97   | feat(frontend): Recipe recommendation modal           | Frontend   | P0       | ✅ Complete (PR #137) |
+| #98   | test(python): Inventory recommendation API tests      | Testing    | P1       | ✅ Complete (PR #137) |
 
 **Epic 4 Deliverables** (PR #137):
+
 - ✅ `POST /inventory-recommend` - Gemini 2.5 Flash powered recommendations
 - ✅ Expiration priority scoring (expired items weighted higher)
 - ✅ Match score calculation (0-100 based on available ingredients)
@@ -298,16 +303,17 @@ user_inventory (
 
 #### 🚧 Epic 5: Integration, Polish & Deployment (Sprint 5) - IN PROGRESS
 
-| Issue | Title                                                    | Type       | Priority | Status     |
-| ----- | -------------------------------------------------------- | ---------- | -------- | ---------- |
-| #99   | Epic: Integration, Polish & Deployment (E5)              | Epic       | P0       | 🚧 In Progress |
-| #100  | feat(frontend): Dashboard smart cart widget              | Frontend   | P1       | 📝 To Do   |
-| #101  | feat(frontend): Shopping list → Inventory transfer flow  | Frontend   | P0       | 📝 To Do   |
-| #102  | feat(frontend): Performance optimization                 | Frontend   | P1       | 📝 To Do   |
-| #103  | test(e2e): Smart cart user journey tests                 | Testing    | P1       | 📝 To Do   |
-| #104  | docs: Smart cart feature documentation                   | Docs       | P1       | ✅ Complete (PR #110) |
+| Issue | Title                                                   | Type     | Priority | Status                |
+| ----- | ------------------------------------------------------- | -------- | -------- | --------------------- |
+| #99   | Epic: Integration, Polish & Deployment (E5)             | Epic     | P0       | 🚧 In Progress        |
+| #100  | feat(frontend): Dashboard smart cart widget             | Frontend | P1       | 📝 To Do              |
+| #101  | feat(frontend): Shopping list → Inventory transfer flow | Frontend | P0       | 📝 To Do              |
+| #102  | feat(frontend): Performance optimization                | Frontend | P1       | 📝 To Do              |
+| #103  | test(e2e): Smart cart user journey tests                | Testing  | P1       | 📝 To Do              |
+| #104  | docs: Smart cart feature documentation                  | Docs     | P1       | ✅ Complete (PR #110) |
 
 **Remaining Tasks for v1.3.0 Completion**:
+
 - Dashboard widget showing expiring items + shopping summary
 - Transfer purchased items from shopping list to inventory
 - Performance audit and lazy loading optimization
@@ -319,35 +325,35 @@ user_inventory (
 
 The following issues were addressed during v1.3.0 development:
 
-| Issue | Title                                                    | Type     | Status     | PR     |
-| ----- | -------------------------------------------------------- | -------- | ---------- | ------ |
-| #113  | fix(Database): Missing 'aisle' column in shopping list   | Bug      | ✅ Fixed   | #114   |
-| #115  | fix(frontend): Shopping list feature locked              | Bug      | ✅ Fixed   | #122   |
-| #123  | fix(Challenge): Progress not saved, calculations wrong   | Bug      | ✅ Fixed   | #125   |
-| #124  | fix(API): Fail to generate shopping list from calendar   | Bug      | ✅ Fixed   | #125   |
-| #126  | fix(test): StreakWidget timezone test failure            | Bug      | ✅ Fixed   | #127   |
-| #128  | fix: Hydration mismatch in AppSidebar DropdownMenu       | Bug      | ✅ Fixed   | #129   |
-| #130  | feat: Add concurrently for dev:full command              | DX       | ✅ Done    | #131   |
-| #133  | fix: Improve Recommender page layout and styling         | UI       | ✅ Fixed   | #134   |
-| -     | feat(epic-4): AI recipe recommendations                  | Feature  | ✅ Done    | #137   |
+| Issue | Title                                                  | Type    | Status   | PR   |
+| ----- | ------------------------------------------------------ | ------- | -------- | ---- |
+| #113  | fix(Database): Missing 'aisle' column in shopping list | Bug     | ✅ Fixed | #114 |
+| #115  | fix(frontend): Shopping list feature locked            | Bug     | ✅ Fixed | #122 |
+| #123  | fix(Challenge): Progress not saved, calculations wrong | Bug     | ✅ Fixed | #125 |
+| #124  | fix(API): Fail to generate shopping list from calendar | Bug     | ✅ Fixed | #125 |
+| #126  | fix(test): StreakWidget timezone test failure          | Bug     | ✅ Fixed | #127 |
+| #128  | fix: Hydration mismatch in AppSidebar DropdownMenu     | Bug     | ✅ Fixed | #129 |
+| #130  | feat: Add concurrently for dev:full command            | DX      | ✅ Done  | #131 |
+| #133  | fix: Improve Recommender page layout and styling       | UI      | ✅ Fixed | #134 |
+| -     | feat(epic-4): AI recipe recommendations                | Feature | ✅ Done  | #137 |
 
 #### Seed Data Scripts
 
-| Script | Description | Location |
-| ------ | ----------- | -------- |
-| `import_to_supabase.py` | Import recipes, ingredients, tags to Supabase | `data/` |
-| `import_shopping_seed.py` | Import shopping list test data (4 lists, 31 items) | `data/` |
-| `inventory_seed.sql` | SQL seed for user inventory (fridge/pantry/freezer) | `supabase/seed/` |
-| `shopping_seed.sql` | SQL seed for shopping lists (manual execution) | `supabase/seed/` |
+| Script                    | Description                                         | Location         |
+| ------------------------- | --------------------------------------------------- | ---------------- |
+| `import_to_supabase.py`   | Import recipes, ingredients, tags to Supabase       | `data/`          |
+| `import_shopping_seed.py` | Import shopping list test data (4 lists, 31 items)  | `data/`          |
+| `inventory_seed.sql`      | SQL seed for user inventory (fridge/pantry/freezer) | `supabase/seed/` |
+| `shopping_seed.sql`       | SQL seed for shopping lists (manual execution)      | `supabase/seed/` |
 
 #### Backend API Design
 
 > **Note**: Shopping list CRUD uses Next.js API Routes. **AI-powered recipe suggestions** use the Python FastAPI backend with `/inventory-recommend` endpoint.
 
-| Issue | Title                                                       | Type           | Priority | Assignee | Status       |
-| ----- | ----------------------------------------------------------- | -------------- | -------- | -------- | ------------ |
-| #94   | feat(python): AI recipe suggestions from inventory          | Python API     | P0       | -        | ✅ Complete  |
-| #95   | feat(python): Expiration priority in suggestions            | Python API     | P0       | -        | ✅ Complete  |
+| Issue | Title                                              | Type       | Priority | Assignee | Status      |
+| ----- | -------------------------------------------------- | ---------- | -------- | -------- | ----------- |
+| #94   | feat(python): AI recipe suggestions from inventory | Python API | P0       | -        | ✅ Complete |
+| #95   | feat(python): Expiration priority in suggestions   | Python API | P0       | -        | ✅ Complete |
 
 **AI Inventory Recommendation Implementation** (Gemini 2.5 Flash):
 
@@ -384,13 +390,13 @@ class InventoryItem(BaseModel):
 # 5. Return structured JSON response
 
 def recommend_from_inventory_gemini(
-    inventory: List[InventoryItem], 
+    inventory: List[InventoryItem],
     preferences: str = None,
     num_recipes: int = 5
 ):
     """
     Use Gemini 2.5 Flash for intelligent recipe recommendations.
-    
+
     Advantages over vector search:
     - Understands complex preferences ("use expiring milk for dessert")
     - Generates natural language reasoning
@@ -398,30 +404,31 @@ def recommend_from_inventory_gemini(
     - More accurate ingredient matching
     """
     recipe_data = load_recipe_data()
-    
+
     # Build inventory context with expiration urgency
     inventory_text = format_inventory_with_expiration(inventory)
-    
+
     # Build recipe options (limit to control tokens)
     recipes_text = format_recipes_for_prompt(recipe_data, limit=100)
-    
+
     prompt = build_recommendation_prompt(
-        inventory_text, 
-        recipes_text, 
-        preferences, 
+        inventory_text,
+        recipes_text,
+        preferences,
         num_recipes
     )
-    
+
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
         generation_config={"response_mime_type": "application/json"}
     )
-    
+
     return parse_gemini_response(response.text)
 ```
 
 **Gemini Prompt Design**:
+
 ```
 You are a smart meal planning assistant.
 Based on the user's available ingredients, recommend {num_recipes} recipes.
@@ -439,7 +446,7 @@ ID:2 | Omelette | Ingredients: eggs, cheese, vegetables
 
 ## Instructions:
 1. Prioritize recipes using ingredients expiring soon
-2. Maximize ingredient utilization 
+2. Maximize ingredient utilization
 3. Consider nutritional balance
 4. Ensure meal variety
 
@@ -452,6 +459,7 @@ ID:2 | Omelette | Ingredients: eggs, cheese, vegetables
 ```
 
 **API Endpoints Preview**:
+
 ```
 # Next.js API Routes (CRUD)
 GET/POST /api/shopping-lists           - List/create shopping lists
@@ -468,13 +476,13 @@ POST /inventory-recommend              - AI recipe suggestions from inventory
 
 **v1.3.0 Sprint Plan**:
 
-| Sprint | Focus Area                    | Issues                          | Duration |
-| ------ | ----------------------------- | ------------------------------- | -------- |
-| 1      | Database Foundation           | #75, #76, #77, #78, #79         | 1 week   |
-| 2      | Shopping List System          | #80, #81, #82, #83, #84, #85, #86 | 2 weeks |
-| 3      | Inventory Management          | #87, #88, #89, #90, #91, #92    | 2 weeks  |
-| 4      | AI Recommendations            | #93, #94, #95, #96, #97, #98    | 2 weeks  |
-| 5      | Integration & Polish          | #99, #100, #101, #102, #103, #104 | 2 weeks |
+| Sprint | Focus Area           | Issues                            | Duration |
+| ------ | -------------------- | --------------------------------- | -------- |
+| 1      | Database Foundation  | #75, #76, #77, #78, #79           | 1 week   |
+| 2      | Shopping List System | #80, #81, #82, #83, #84, #85, #86 | 2 weeks  |
+| 3      | Inventory Management | #87, #88, #89, #90, #91, #92      | 2 weeks  |
+| 4      | AI Recommendations   | #93, #94, #95, #96, #97, #98      | 2 weeks  |
+| 5      | Integration & Polish | #99, #100, #101, #102, #103, #104 | 2 weeks  |
 
 **Expected Deliverables**:
 
@@ -520,6 +528,7 @@ Overall Phase 2: ██████████████████░░ ~9
 **Current Focus**: Epic 4-5 - AI Recommendations, Integration
 
 **Completed**:
+
 1. ✅ GitHub issues created (30 issues total)
 2. ✅ Epic 1: Database migrations (#76, #77, #78)
 3. ✅ Epic 1: TypeScript types (#79)
@@ -533,6 +542,7 @@ Overall Phase 2: ██████████████████░░ ~9
 11. ✅ Epic 5: Documentation (#104)
 
 **In Progress**:
+
 - 🚧 Epic 4: AI recipe suggestions API (#94, #95)
 - 🚧 Epic 4: Recipe recommendation modal (#97)
 - 🚧 Epic 5: Dashboard widget & transfer flow (#100, #101)
@@ -541,18 +551,18 @@ Overall Phase 2: ██████████████████░░ ~9
 
 ### Issue Labels for v1.3.0
 
-| Label        | Usage                              |
-| ------------ | ---------------------------------- |
-| `epic`       | Epic-level tracking issue          |
-| `v1.3.0`     | Version milestone                  |
-| `phase-2`    | Phase 2 features                   |
-| `frontend`   | Frontend-related work              |
-| `backend`    | Backend-related work               |
-| `database`   | Database changes                   |
-| `testing`    | Test coverage                      |
-| `priority-p0`| Critical (must have)               |
-| `priority-p1`| High (should have)                 |
-| `priority-p2`| Medium (nice to have)              |
+| Label         | Usage                     |
+| ------------- | ------------------------- |
+| `epic`        | Epic-level tracking issue |
+| `v1.3.0`      | Version milestone         |
+| `phase-2`     | Phase 2 features          |
+| `frontend`    | Frontend-related work     |
+| `backend`     | Backend-related work      |
+| `database`    | Database changes          |
+| `testing`     | Test coverage             |
+| `priority-p0` | Critical (must have)      |
+| `priority-p1` | High (should have)        |
+| `priority-p2` | Medium (nice to have)     |
 
 ---
 
@@ -767,16 +777,16 @@ Overall Phase 2: ██████████████████░░ ~9
 
 #### Delivered / Planned Features
 
-| Feature      | Description                              | Complexity | Issue # | Status |
-| ------------ | ---------------------------------------- | ---------- | ------- | ------ |
-| Badge System | Earn badges for achievements             | Medium     | #32     | ✅ Complete |
-| Achievements | UI + API to view/unlock badges           | Medium     | #35/#36 | ✅ Complete |
-| Types        | Gamification TS types                    | Low        | #33     | ✅ Complete |
-| Streaks      | Track consecutive days of healthy eating | Medium     | #60/#61 | ✅ Complete |
-| Challenges   | Weekly/monthly challenges                | Medium     | #65/#66/#68 | ✅ Complete |
-| Rewards      | Unlock features through achievements     | Medium     | TBD     | ⏸️ Deferred to v2.0.0 |
-| Leaderboard  | Community rankings (optional)            | High       | TBD     | ⏸️ Deferred to v3.1.0 |
-| Notifications| Notify on unlocks                        | Medium     | #62/#63 | 🚧 API Ready, Frontend Pending |
+| Feature       | Description                              | Complexity | Issue #     | Status                         |
+| ------------- | ---------------------------------------- | ---------- | ----------- | ------------------------------ |
+| Badge System  | Earn badges for achievements             | Medium     | #32         | ✅ Complete                    |
+| Achievements  | UI + API to view/unlock badges           | Medium     | #35/#36     | ✅ Complete                    |
+| Types         | Gamification TS types                    | Low        | #33         | ✅ Complete                    |
+| Streaks       | Track consecutive days of healthy eating | Medium     | #60/#61     | ✅ Complete                    |
+| Challenges    | Weekly/monthly challenges                | Medium     | #65/#66/#68 | ✅ Complete                    |
+| Rewards       | Unlock features through achievements     | Medium     | TBD         | ⏸️ Deferred to v2.0.0          |
+| Leaderboard   | Community rankings (optional)            | High       | TBD         | ⏸️ Deferred to v3.1.0          |
+| Notifications | Notify on unlocks                        | Medium     | #62/#63     | 🚧 API Ready, Frontend Pending |
 
 #### Technical Requirements
 

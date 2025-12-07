@@ -1,7 +1,7 @@
 /**
  * Test Coverage Improvement for Smart Cart Features
  * Issue #109: Comprehensive testing for inventory, shopping, and recommendations
- * 
+ *
  * Test Suites:
  * - Unit tests for utility functions
  * - API integration tests
@@ -132,7 +132,7 @@ describe("Enhanced Recommendation Algorithm", () => {
   it("should prioritize recipes with expiring ingredients", () => {
     const recipes = [
       { name: "Salad", expiringIngredients: 3, score: 0.85 },
-      { name: "Pasta", expiringIngredients: 1, score: 0.60 },
+      { name: "Pasta", expiringIngredients: 1, score: 0.6 },
     ];
 
     const prioritized = recipes.sort((a, b) => b.score - a.score);

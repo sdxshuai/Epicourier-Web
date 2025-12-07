@@ -43,10 +43,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error generating share link:", error);
-    return NextResponse.json(
-      { error: "Failed to generate share link" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to generate share link" }, { status: 500 });
   }
 }
 
@@ -62,10 +59,7 @@ export async function GET(request: NextRequest) {
     const shareToken = searchParams.get("token");
 
     if (!shareToken) {
-      return NextResponse.json(
-        { error: "Share token required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Share token required" }, { status: 400 });
     }
 
     // Retrieve shared list
@@ -87,10 +81,7 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error || !data) {
-      return NextResponse.json(
-        { error: "Invalid or expired share link" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Invalid or expired share link" }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -100,9 +91,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error retrieving shared list:", error);
-    return NextResponse.json(
-      { error: "Failed to retrieve shared list" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to retrieve shared list" }, { status: 500 });
   }
 }

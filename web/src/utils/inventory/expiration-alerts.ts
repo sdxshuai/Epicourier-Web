@@ -24,9 +24,7 @@ function formatDate(date: Date): string {
   return date.toISOString().split("T")[0];
 }
 
-export async function getExpiringItemsWithAlerts(
-  userId: string
-): Promise<ExpiringItem[]> {
+export async function getExpiringItemsWithAlerts(userId: string): Promise<ExpiringItem[]> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -44,10 +42,7 @@ export async function getExpiringItemsWithAlerts(
   // Calculate alert severity based on days remaining
   return items
     .map((item: any) => {
-      const daysUntilExpiration = differenceInDays(
-        new Date(item.expiration_date),
-        new Date()
-      );
+      const daysUntilExpiration = differenceInDays(new Date(item.expiration_date), new Date());
 
       let alertSeverity: "critical" | "warning" | "info" = "info";
       if (daysUntilExpiration <= 1) alertSeverity = "critical";
@@ -63,9 +58,7 @@ export async function getExpiringItemsWithAlerts(
 }
 
 // Smart notification scheduling
-export async function scheduleExpirationNotifications(
-  userId: string
-): Promise<void> {
+export async function scheduleExpirationNotifications(userId: string): Promise<void> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
