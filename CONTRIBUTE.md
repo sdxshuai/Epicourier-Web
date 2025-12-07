@@ -104,7 +104,7 @@ These rules are enforced via **Branch Protection Settings**.
 
 ```bash
 npm install
-npm run dev
+npm run dev:full
 npm run test
 ```
 
@@ -112,15 +112,12 @@ npm run test
 
 We use a local Supabase instance for development and testing.
 
-> [!NOTE]
-> We use `npx supabase@beta` because the stable version has known issues with Docker on some environments.
-
 ### Setup & Run
 
 1. **Start Supabase**:
 
    ```bash
-   npx supabase@beta start
+   supabase start
    ```
 
    This will spin up the local database, auth, and other services.
@@ -128,19 +125,19 @@ We use a local Supabase instance for development and testing.
 2. **Stop Supabase**:
 
    ```bash
-   npx supabase@beta stop
+   supabase stop
    ```
 
 3. **Reset Database** (Apply migrations & seed data):
    ```bash
-   npx supabase@beta db reset
+   supabase db reset
    ```
 
 ### Migrations
 
 - **Create a migration**:
   ```bash
-  npx supabase@beta db diff -f <migration_name>
+  supabase db diff -f <migration_name>
   ```
 - **Apply migrations**:
   Automatically applied when running `start` or `db reset`.
