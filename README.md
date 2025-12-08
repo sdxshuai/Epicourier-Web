@@ -1,13 +1,13 @@
 # Epicourier-Web 🍽️
 
-[![CI/CD Pipeline](https://github.com/sdxshuai/Epicourier-Web/actions/workflows/test.yml/badge.svg)](https://github.com/sdxshuai/Epicourier-Web/actions/workflows/test.yml)
+[![CI/CD Pipeline](https://github.com/sdxshuai/Epicourier-Web/actions/workflows/ci-jest.yml/badge.svg)](https://github.com/sdxshuai/Epicourier-Web/actions/workflows/ci-jest.yml)
 [![codecov](https://codecov.io/github/sdxshuai/Epicourier-Web/graph/badge.svg?token=TTLT1APZ44)](https://codecov.io/github/sdxshuai/Epicourier-Web)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17537732.svg)](https://doi.org/10.5281/zenodo.17537732)
 [![Project Status: Active](https://img.shields.io/badge/status-active-brightgreen.svg)](#)
 
 **YOUR NUTRITION, YOUR CONTROL. AI-POWERED MEAL PLANNING FOR WELLNESS AND SUSTAINABILITY.**
 
-Epicourier is an intelligent meal planning and grocery management platform powered by **Next.js**, **FastAPI**, and **Supabase**. By analyzing your dietary preferences, health goals, and lifestyle, our AI delivers hyper-personalized meal recommendations, intelligently manages your inventory to reduce food waste, and streamlines your grocery shopping with precision nutrition tracking.
+Epicourier is a comprehensive, full-stack web ecosystem designed to modernize the culinary lifestyle. It seamlessly integrates AI-driven recipe generation with advanced inventory management. While the platform automates the logic of meal planning, our latest expansion focuses on the execution: tracking nutrition, gamifying consistency, and optimizing grocery logistics to reduce waste and enhance user engagement.
 
 ---
 
@@ -22,8 +22,6 @@ Epicourier is an intelligent meal planning and grocery management platform power
 **[▶️ Watch on YouTube](https://youtu.be/qbFYmMTnb5M)** | Full Features Demo
 
 </div>
-
----
 
 ---
 
@@ -53,7 +51,7 @@ _Reduce waste, save money._
 - **Gemini-Powered Suggestions**: Our Python API utilizes **Google Gemini 2.5 Flash** to recommend recipes based specifically on ingredients expiring soon to minimize waste.
 - **Seamless Logistics**: One-click generation of shopping lists from meal plans, with automatic transfer flow from "Shopping List" to "User Inventory" upon purchase.
 
-> **Tests**: 1,130+ automated test cases covering UI interactions, gamification logic, and backend AI services (Jest/Pytest). Pipelines: End-to-end GitHub Actions workflows for instant formatting (Ruff/Prettier), linting, and unit verification.
+**Tests**: 1,130+ automated test cases covering UI interactions, gamification logic, and backend AI services (Jest/Pytest). Pipelines: End-to-end GitHub Actions workflows for instant formatting (Ruff/Prettier), linting, and unit verification.
 
 ---
 
