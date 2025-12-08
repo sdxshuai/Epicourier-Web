@@ -1,16 +1,29 @@
-# Epicourier-Web
+# Epicourier-Web 🍽️
 
-A full-stack meal planning and grocery management web app powered by **Next.js**, **FastAPI**, and **Supabase**.  
-This repository hosts the **frontend** (Next.js + TypeScript + Tailwind CSS) and connects seamlessly to the backend API for AI-powered recommendations.
-
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17537732.svg)](https://doi.org/10.5281/zenodo.17537732)
+[![CI/CD Pipeline](https://github.com/sdxshuai/Epicourier-Web/actions/workflows/test.yml/badge.svg)](https://github.com/sdxshuai/Epicourier-Web/actions/workflows/test.yml)
 [![codecov](https://codecov.io/github/sdxshuai/Epicourier-Web/graph/badge.svg?token=TTLT1APZ44)](https://codecov.io/github/sdxshuai/Epicourier-Web)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17537732.svg)](https://doi.org/10.5281/zenodo.17537732)
+[![Project Status: Active](https://img.shields.io/badge/status-active-brightgreen.svg)](#)
+
+**YOUR NUTRITION, YOUR CONTROL. AI-POWERED MEAL PLANNING FOR WELLNESS AND SUSTAINABILITY.**
+
+Epicourier is an intelligent meal planning and grocery management platform powered by **Next.js**, **FastAPI**, and **Supabase**. By analyzing your dietary preferences, health goals, and lifestyle, our AI delivers hyper-personalized meal recommendations, intelligently manages your inventory to reduce food waste, and streamlines your grocery shopping with precision nutrition tracking.
+
+---
 
 ## 🎬 Demo Video
 
-[![Demo Video](https://img.youtube.com/vi/QW4FuDJqLx0/maxresdefault.jpg)](https://youtu.be/QW4FuDJqLx0)
-<br>
-**[Watch the demo on YouTube »](https://youtu.be/QW4FuDJqLx0)**
+**Watch our project demonstration on YouTube:**
+
+<div align="center">
+  
+[![Epicourier Demo Video](https://img.youtube.com/vi/qbFYmMTnb5M/maxresdefault.jpg)](https://youtu.be/qbFYmMTnb5M)
+
+**[▶️ Watch on YouTube](https://youtu.be/qbFYmMTnb5M)** | Full Features Demo
+
+</div>
+
+---
 
 ---
 
