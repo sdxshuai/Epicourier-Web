@@ -109,7 +109,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { recipe_id, date, meal_type, status, recipe_name } = body;
+  const { recipe_id, date, meal_type, status } = body;
 
   if (!recipe_id || !date || !meal_type) {
     return NextResponse.json(
@@ -118,58 +118,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const numericRecipeId = Number(recipe_id);
-
-  // ✅ 確保食譜存在，如果不存在則自動創建
-  try {
-    // 檢查食譜是否存在
-    const { data: existingRecipe } = await supabase
-      .from("Recipe")
-      .select("id")
-      .eq("id", numericRecipeId)
-      .maybeSingle();
-
-    // 如果不存在，自動創建一個佔位符食譜
-    if (!existingRecipe) {
-      console.log(`Creating placeholder recipe for ID ${numericRecipeId}`);
-      
-      // 使用認證用戶的身份插入食譜
-      const { error: insertError } = await supabase
-        .from("Recipe")
-        .insert([
-          {
-            id: numericRecipeId,
-            name: recipe_name || `Recipe ${numericRecipeId}`,
-            description: `Auto-created from meal recommendation`,
-            image_url: null,
-            min_prep_time: 30,
-            green_score: 75.0,
-            owner_id: publicUserId,
-          },
-        ])
-        .select("id")
-        .single();
-
-      if (insertError) {
-        console.warn(
-          `Could not create placeholder recipe: ${insertError.message}`
-        );
-        // Continue anyway - the recipe might be created by another request
-      } else {
-        console.log(`✅ Created recipe ${numericRecipeId}`);
-      }
-    }
-  } catch (recipeError) {
-    console.warn("Error during recipe creation check:", recipeError);
-    // Continue anyway - the recipe might already exist
-  }
-
   // ✅ 插入後立即 select Recipe join，讓回傳值也包含食譜資訊
   const { data, error } = await supabase
     .from("Calendar")
     .insert([
       {
-        recipe_id: numericRecipeId,
+        recipe_id: Number(recipe_id),
         date: String(date),
         meal_type: String(meal_type),
         status: typeof status === "boolean" ? status : false,

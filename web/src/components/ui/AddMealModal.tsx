@@ -41,7 +41,6 @@ export default function AddMealModal({ recipe, isOpen, onClose, onSuccess }: Add
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         recipe_id: recipe.id,
-        recipe_name: recipe.name,
         date: selectedDate,
         meal_type: mealType,
         status: false,

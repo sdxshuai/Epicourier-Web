@@ -5,7 +5,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { SmartCartWidget } from "@/components/dashboard/SmartCartWidget";
+import { SmartCartWidget } from "@/components/ui/SmartCartWidget";
 import type { SmartCartWidgetData } from "@/types/data";
 
 // Mock fetch

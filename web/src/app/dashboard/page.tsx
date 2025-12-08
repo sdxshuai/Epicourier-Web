@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { SmartCartWidget } from "@/components/ui/SmartCartWidget";
 import {
   Calendar,
   Trophy,
@@ -357,9 +358,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Smart Cart Widget - Full Width Horizontal */}
-      {/* <div className="brutalism-card rounded-none bg-white p-5">
+      <div className="brutalism-card rounded-none bg-white p-5">
         <SmartCartWidget title="Smart Cart" />
-      </div> */}
+      </div>
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
