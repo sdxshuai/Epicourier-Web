@@ -8,7 +8,8 @@ import AddMealModal from "../../../components/ui/AddMealModal";
 import { supabase } from "../../../lib/supabaseClient";
 
 interface Recipe {
-  id: number;
+  id?: number;
+  meal_number?: number;
   name: string;
   key_ingredients: string[];
   recipe: string;
@@ -264,7 +265,10 @@ export default function RecommendPage() {
 
                       {isModalOpen && (
                         <AddMealModal
-                          recipe={{ id: recipe.id, name: recipe.name ?? "Recipe" }}
+                          recipe={{ 
+                            id: recipe.id || recipe.meal_number || i + 1, 
+                            name: recipe.name ?? "Recipe" 
+                          }}
                           isOpen={isModalOpen}
                           onClose={() => setIsModalOpen(false)}
                         />

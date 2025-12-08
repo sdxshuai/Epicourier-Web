@@ -1,0 +1,125 @@
+📋 数据集构建完整检查清单
+═══════════════════════════════════════════════════════════════
+
+🔧 前置准备
+─────────────────────────────────────────────────────────────
+☐ 1. 下载 recipes.csv
+    https://gist.github.com/SeojinSeojin/e09119e728826ff07e5f9ba4d39a4648
+    
+☐ 2. 创建 .env 文件
+    echo "GEMINI_API_KEY=your_key_here" > .env
+    
+☐ 3. 确认提示文件存在
+    ls prompts/system_prompt.txt
+    ls prompts/user_prompt.txt
+    
+☐ 4. 安装依赖
+    uv pip install -r requirements.txt
+
+📊 阶段 1: Gemini 处理 (30-60 min)
+─────────────────────────────────────────────────────────────
+☐ 运行: python llama_recipe_pipeline.py
+    
+检查:
+☐ cache/ 目录已创建
+☐ cache/ 中有 JSON 文件
+  ls cache/ | wc -l  (应该 >= 50)
+  
+症状检查:
+☐ 没有 "Gemini API 错误"
+☐ 没有大量 "JSON 解析错误"
+☐ 输出中有 "✅ Cached" 或 "💾 Saved"
+
+📝 阶段 2: CSV 转换 (< 1 min)
+─────────────────────────────────────────────────────────────
+☐ 运行: python cache_to_csv.py
+
+检查:
+☐ 5 个 CSV 文件已生成
+  ls *-supabase.csv
+  
+验证内容:
+☐ ingredients-supabase.csv 有数据
+  head ingredients-supabase.csv | wc -l
+  
+☐ recipes-supabase.csv 有数据
+  head recipes-supabase.csv | wc -l
+  
+☐ 所有 CSV 格式正确
+  grep -c "^[0-9]" ingredients-supabase.csv
+
+🗄️  阶段 3: 数据库导入 (2-5 min)
+─────────────────────────────────────────────────────────────
+前提条件:
+☐ Supabase 已启动
+  curl -s http://localhost:54321 > /dev/null
+  
+运行导入:
+☐ 运行: python import_to_supabase.py
+
+检查导入状态:
+☐ RecipeTag 导入完成 (35 rows)
+☐ Ingredient 导入完成 (247 rows)
+☐ Recipe 导入完成 (50 rows)
+☐ Recipe-Ingredient_Map 导入完成 (645 rows)
+☐ Recipe-Tag_Map 导入完成 (92 rows)
+☐ 最后输出 "🎉 Data import completed!"
+
+✅ 数据库验证
+─────────────────────────────────────────────────────────────
+使用 Supabase Studio:
+☐ 打开 supabase studio
+☐ Recipe 表有 50+ 行
+☐ Ingredient 表有 247+ 行
+☐ RecipeTag 表有 35+ 行
+☐ 可以执行 JOIN 查询
+
+🌐 应用验证
+─────────────────────────────────────────────────────────────
+前置:
+☐ 后端已启动 (localhost:8000)
+☐ 前端已启动 (localhost:3000)
+☐ 用户已登录
+
+测试推荐系统:
+☐ 访问 http://localhost:3000/dashboard/recommender
+☐ 输入目标 (例如: "High protein diet")
+☐ 点击 "Get My Daily Plan"
+☐ 显示 3-7 个食谱建议
+☐ 每个食谱显示名称、食材、标签
+
+测试添加到日历:
+☐ 点击食谱的 "+ Add to Calendar" 按钮
+☐ 选择日期和餐型
+☐ 点击 "Confirm"
+☐ 成功添加 (无外键错误)
+
+📊 数据质量检查
+─────────────────────────────────────────────────────────────
+☐ 所有食谱都有名称
+☐ 所有食谱都有描述 (不为空)
+☐ 营养数据已正确导入
+☐ 标签信息已正确关联
+☐ 食材映射关系正确
+
+🎯 最终检查
+─────────────────────────────────────────────────────────────
+☐ 完整性
+   - 所有 5 个表都有数据
+   - 没有缺失的外键
+   - 没有重复的记录
+
+☐ 一致性
+   - 所有 ID 都在正确范围内
+   - 所有引用都指向存在的记录
+   - 数据类型都正确
+
+☐ 可用性
+   - 推荐系统工作正常
+   - 日历可以添加事件
+   - 营养追踪显示数据
+
+═══════════════════════════════════════════════════════════════
+✨ 所有检查完成!
+现在可以使用 Epicourier 应用了 🚀
+═══════════════════════════════════════════════════════════════

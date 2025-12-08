@@ -298,6 +298,9 @@ export function useNutrientDashboard() {
         description: "Daily nutrient target updated",
       });
       setGoalModalOpen(false);
+      
+      // Refresh charts to update percentages with new goal values
+      await fetchNutrientData();
     } catch (err) {
       console.error("Error saving nutrient goal:", err);
       toast({

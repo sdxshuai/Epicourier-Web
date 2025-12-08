@@ -57,8 +57,24 @@ def recommend_meals(req: RecommendRequest):
             status_code=400, detail="numMeals must be one of 3, 5, or 7"
         )
 
-    plan, expanded_goal = create_meal_plan(req.goal, n_meals=req.num_meals)
-    return {"recipes": plan, "goal_expanded": expanded_goal}
+    try:
+        plan, expanded_goal = create_meal_plan(req.goal, n_meals=req.num_meals)
+        
+        # Check if we got recommendations
+        if not plan:
+            raise HTTPException(
+                status_code=503, 
+                detail="No recipes available. Please ensure recipe data is loaded in the database."
+            )
+        
+        return {"recipes": plan, "goal_expanded": expanded_goal}
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error generating recommendations: {str(e)}"
+        )
 
 
 @app.post("/inventory-recommend")
